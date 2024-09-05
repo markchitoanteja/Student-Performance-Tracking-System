@@ -7,7 +7,7 @@
 
     <link rel="shortcut icon" href="<?= base_url() ?>public/dist/img/favicon.ico" type="image/x-icon">
 
-    <title>Student Performance Tracking System | Dashboard</title>
+    <title>Student Performance Tracking System | <?= session()->get("title") ?></title>
 
     <link rel="stylesheet" href="<?= base_url() ?>public/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="<?= base_url() ?>public/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
