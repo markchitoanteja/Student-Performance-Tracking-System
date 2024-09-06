@@ -20,11 +20,11 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-body">
-                    <table id="datatable" class="table table-bordered table-striped">
+                    <table class="table table-bordered table-striped datatable">
                         <thead>
                             <tr>
                                 <th>Student Number</th>
-                                <th>Student Full Name</th>
+                                <th>Student Name</th>
                                 <th>Course, Year and Section</th>
                                 <th>Email Address</th>
                                 <th class="text-center">Actions</th>

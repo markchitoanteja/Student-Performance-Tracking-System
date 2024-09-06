@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use App\Models\User_Model;
 use App\Models\Student_Model;
+use App\Models\Course_Model;
+use App\Models\Subject_Model;
 
 date_default_timezone_set('Asia/Manila');
 
@@ -42,12 +44,68 @@ class Main extends BaseController
 
             $User_Model = new User_Model();
             $Student_Model = new Student_Model();
+            $Course_Model = new Course_Model();
 
             $data["user_data"] = $User_Model->where('id', session()->get("user_id"))->first();
             $data["students"] = $Student_Model->orderBy('id', 'DESC')->findAll();
+            $data["courses"] = $Course_Model->orderBy('code', 'ASC')->findAll();
 
             $header = view("templates/header", $data);
             $body = view("main/manage_students_view");
+            $footer = view("templates/footer");
+
+            return $header . $body . $footer;
+        } else {
+            session()->set("notification", array(
+                "type" => "alert-danger",
+                "message" => "You must login first!",
+            ));
+
+            return redirect()->to(base_url());
+        }
+    }
+
+    public function manage_courses()
+    {
+        if (session()->get("user_id")) {
+            session()->set("current_page", "manage_courses");
+            session()->set("title", "Manage Courses");
+
+            $User_Model = new User_Model();
+            $Course_Model = new Course_Model();
+
+            $data["user_data"] = $User_Model->where('id', session()->get("user_id"))->first();
+            $data["courses"] = $Course_Model->orderBy('id', 'DESC')->findAll();
+
+            $header = view("templates/header", $data);
+            $body = view("main/manage_courses_view");
+            $footer = view("templates/footer");
+
+            return $header . $body . $footer;
+        } else {
+            session()->set("notification", array(
+                "type" => "alert-danger",
+                "message" => "You must login first!",
+            ));
+
+            return redirect()->to(base_url());
+        }
+    }
+
+    public function manage_subjects()
+    {
+        if (session()->get("user_id")) {
+            session()->set("current_page", "manage_subjects");
+            session()->set("title", "Manage Subjects");
+
+            $User_Model = new User_Model();
+            $Subject_Model = new Subject_Model();
+
+            $data["user_data"] = $User_Model->where('id', session()->get("user_id"))->first();
+            $data["subjects"] = $Subject_Model->orderBy('id', 'DESC')->findAll();
+
+            $header = view("templates/header", $data);
+            $body = view("main/manage_subjects_view");
             $footer = view("templates/footer");
 
             return $header . $body . $footer;
@@ -71,9 +129,11 @@ class Main extends BaseController
 
                 $User_Model = new User_Model();
                 $Student_Model = new Student_Model();
+                $Course_Model = new Course_Model();
 
                 $data["user_data"] = $User_Model->where('id', session()->get("user_id"))->first();
                 $data["student_data"] = $Student_Model->where('student_number', $student_number)->first();
+                $data["courses"] = $Course_Model->orderBy('code', 'ASC')->findAll();
 
                 $middle_initial = isset($data["student_data"]["middle_name"]) && !empty($data["student_data"]["middle_name"]) ? strtoupper($data["student_data"]["middle_name"][0]) . '. ' : '';
                 $full_name = $data["student_data"]["first_name"] . " " . $middle_initial . $data["student_data"]["last_name"];
@@ -259,6 +319,241 @@ class Main extends BaseController
         }
 
         echo json_encode($response);
+    }
+
+    public function add_course()
+    {
+        $code = $this->request->getPost("code");
+        $title = $this->request->getPost("title");
+        $years = $this->request->getPost("years");
+
+        $response = false;
+
+        $Course_Model = new Course_Model();
+
+        $course_data = $Course_Model->where('code', $code)->first();
+
+        if (!$course_data) {
+            $data = [
+                "code" => $code,
+                "title" => $title,
+                "years" => $years,
+                "created_at" => date("Y-m-d H:i:s"),
+                "updated_at" => date("Y-m-d H:i:s"),
+            ];
+
+            $Course_Model->save($data);
+
+            session()->set("notification", array(
+                "title" => "Success!",
+                "text" => "A course has been added to the list.",
+                "icon" => "success",
+            ));
+
+            $response = true;
+        }
+
+        echo json_encode($response);
+    }
+
+    public function update_course()
+    {
+        $id = $this->request->getPost("id");
+        $is_new_code = $this->request->getPost("is_new_code");
+        $code = $this->request->getPost("code");
+        $title = $this->request->getPost("title");
+        $years = $this->request->getPost("years");
+
+        $errors = 0;
+        $response = false;
+
+        $Course_Model = new Course_Model();
+
+        if ($is_new_code == "true") {
+            $course_data = $Course_Model->where('code', $code)->first();
+
+            if ($course_data) {
+                $errors++;
+            }
+        }
+
+        if (!$errors) {
+            $data = [
+                "code" => $code,
+                "title" => $title,
+                "years" => $years,
+                "updated_at" => date("Y-m-d H:i:s"),
+            ];
+
+            $Course_Model->update($id, $data);
+
+            session()->set("notification", array(
+                "title" => "Success!",
+                "text" => "A course has been updated successfully.",
+                "icon" => "success",
+            ));
+
+            $response = true;
+        }
+
+        echo json_encode($response);
+    }
+
+    public function delete_course()
+    {
+        $course_id = $this->request->getPost("course_id");
+
+        $Course_Model = new Course_Model();
+
+        $Course_Model->delete($course_id);
+
+        session()->set("notification", array(
+            "title" => "Success!",
+            "text" => "A course has been successfully deleted from the list.",
+            "icon" => "success",
+        ));
+
+        echo json_encode(true);
+    }
+
+    public function get_course_data()
+    {
+        $course_id = $this->request->getPost("course_id");
+
+        $Course_Model = new Course_Model();
+
+        $course_data = $Course_Model->where('id', $course_id)->first();
+
+        echo json_encode($course_data);
+    }
+
+    public function get_course_data_by_code()
+    {
+        $code = $this->request->getPost("code");
+
+        $Course_Model = new Course_Model();
+
+        $course_data = $Course_Model->where('code', $code)->first();
+
+        echo json_encode($course_data);
+    }
+
+    public function add_subject()
+    {
+        $code = $this->request->getPost("code");
+        $title = $this->request->getPost("title");
+        $lecture_units = $this->request->getPost("lecture_units");
+        $laboratory_units = $this->request->getPost("laboratory_units");
+        $hours_per_week = $this->request->getPost("hours_per_week");
+        $pre_requisites = $this->request->getPost("pre_requisites");
+
+        $Subject_Model = new Subject_Model();
+
+        $subject_data = $Subject_Model->where('code', $code)->first();
+
+        $response = false;
+
+        if (!$subject_data) {
+            $data = [
+                "code" => $code,
+                "title" => $title,
+                "lecture_units" => $lecture_units,
+                "laboratory_units" => $laboratory_units,
+                "hours_per_week" => $hours_per_week,
+                "pre_requisites" => $pre_requisites,
+                "created_at" => date("Y-m-d H:i:s"),
+                "updated_at" => date("Y-m-d H:i:s"),
+            ];
+
+            $Subject_Model->save($data);
+
+            session()->set("notification", array(
+                "title" => "Success!",
+                "text" => "A subject has been successfully added to the list.",
+                "icon" => "success",
+            ));
+
+            $response = true;
+        }
+
+        echo json_encode($response);
+    }
+
+    public function update_subject()
+    {
+        $id = $this->request->getPost("id");
+        $is_new_code = $this->request->getPost("is_new_code");
+        $code = $this->request->getPost("code");
+        $title = $this->request->getPost("title");
+        $lecture_units = $this->request->getPost("lecture_units");
+        $laboratory_units = $this->request->getPost("laboratory_units");
+        $hours_per_week = $this->request->getPost("hours_per_week");
+        $pre_requisites = $this->request->getPost("pre_requisites");
+
+        $Subject_Model = new Subject_Model();
+
+        $errors = 0;
+        $response = false;
+
+        if ($is_new_code == "true") {
+            $subject_data = $Subject_Model->where('code', $code)->first();
+
+            if ($subject_data) {
+                $errors++;
+            }
+        }
+
+        if (!$errors) {
+            $data = [
+                "code" => $code,
+                "title" => $title,
+                "lecture_units" => $lecture_units,
+                "laboratory_units" => $laboratory_units,
+                "hours_per_week" => $hours_per_week,
+                "pre_requisites" => $pre_requisites,
+                "updated_at" => date("Y-m-d H:i:s"),
+            ];
+
+            $Subject_Model->update($id, $data);
+
+            session()->set("notification", array(
+                "title" => "Success!",
+                "text" => "A subject has been successfully updated.",
+                "icon" => "success",
+            ));
+
+            $response = true;
+        }
+
+        echo json_encode($response);
+    }
+
+    public function delete_subject()
+    {
+        $subject_id = $this->request->getPost("subject_id");
+
+        $Subject_Model = new Subject_Model();
+
+        $Subject_Model->delete($subject_id);
+
+        session()->set("notification", array(
+            "title" => "Success!",
+            "text" => "A subject has been successfully deleted from the list.",
+            "icon" => "success",
+        ));
+
+        echo json_encode(true);
+    }
+
+    public function get_subject_data()
+    {
+        $subject_id = $this->request->getPost("subject_id");
+
+        $Subject_Model = new Subject_Model();
+
+        $subject_data = $Subject_Model->where('id', $subject_id)->first();
+
+        echo json_encode($subject_data);
     }
 
     private function upload_image($target_directory, $image_file)

@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="<?= base_url() ?>public/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     <link rel="stylesheet" href="<?= base_url() ?>public/plugins/sweetalert2/css/sweetalert2.min.css">
     <link rel="stylesheet" href="<?= base_url() ?>public/plugins/datatables/css/dataTables.bootstrap4.css">
+    <link rel="stylesheet" href="<?= base_url() ?>public/plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="<?= base_url() ?>public/plugins/select2/css/select2-bootstrap4.min.css">
     <link rel="stylesheet" href="<?= base_url() ?>public/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="<?= base_url() ?>public/dist/css/fonts.min.css">
 </head>
@@ -79,19 +81,31 @@
                         </li>
                         <li class="nav-item">
                             <a href="<?= base_url() ?>manage_students" class="nav-link <?= session()->get("current_page") == "manage_students" ? "active" : null ?>">
-                                <i class="nav-icon fas fa-graduation-cap"></i>
+                                <i class="nav-icon fas fa-user-graduate"></i>
                                 <p>Manage Students</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= base_url() ?>manage_subjects" class="nav-link <?= session()->get("current_page") == "manage_subjects" ? "active" : null ?>">
+                            <a href="<?= base_url() ?>manage_courses" class="nav-link <?= session()->get("current_page") == "manage_courses" ? "active" : null ?>">
                                 <i class="nav-icon fas fa-book-open"></i>
+                                <p>Manage Courses</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="<?= base_url() ?>manage_subjects" class="nav-link <?= session()->get("current_page") == "manage_subjects" ? "active" : null ?>">
+                                <i class="nav-icon fas fa-book"></i>
                                 <p>Manage Subjects</p>
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="<?= base_url() ?>manage_grades" class="nav-link <?= session()->get("current_page") == "manage_grades" ? "active" : null ?>">
+                                <i class="nav-icon fas fa-chart-line"></i>
+                                <p>Manage Grades</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="<?= base_url() ?>manage_awards" class="nav-link <?= session()->get("current_page") == "manage_awards" ? "active" : null ?>">
-                                <i class="nav-icon fas fa-medal"></i>
+                                <i class="nav-icon fas fa-trophy"></i>
                                 <p>Manage Awards</p>
                             </a>
                         </li>

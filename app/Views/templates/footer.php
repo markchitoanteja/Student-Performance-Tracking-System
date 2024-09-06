@@ -7,6 +7,15 @@
         </footer>
         </div>
 
+        <!-- View Full Screen Image Modal -->
+        <div class="modal fade" id="view_image_modal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <img id="image_container" alt="Full Screen Image">
+                </div>
+            </div>
+        </div>
+
         <!-- Account Settings Modal -->
         <div class="modal fade" id="account_settings_modal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -60,251 +69,466 @@
             </div>
         </div>
 
-        <!-- New Student Modal -->
-        <div class="modal fade" id="new_student_modal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="overlay d-none loading">
-                        <i class="fas fa-2x fa-sync fa-spin"></i>
-                    </div>
-                    <div class="modal-header">
-                        <h5 class="modal-title">New Student</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form action="javascript:void(0)" id="new_student_form">
-                        <div class="modal-body">
-                            <div class="text-center mb-3">
-                                <img id="new_student_image_display" class="rounded-circle" src="<?= base_url() ?>public/dist/img/default-user-image.png" alt="User Image" style="width: 100px; height: 100px;">
-                            </div>
-                            <div class="form-group text-center">
-                                <label for="new_student_image">Upload Image</label>
-                                <input type="file" class="form-control-file" id="new_student_image" accept="image/*" required>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="new_student_student_number" class="required">Student Number</label>
-                                        <input type="text" class="form-control" id="new_student_student_number" required>
-                                        <small class="text-danger d-none" id="error_new_student_student_number">Student Number is already in use</small>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="new_student_course" class="required">Course</label>
-                                        <select id="new_student_course" class="custom-select" required>
-                                            <option value selected disabled></option>
-                                            <option value="BSIT">Bachelor of Science in Information Technology</option>
-                                            <option value="BSA">Bachelor of Science in Agriculture</option>
-                                            <option value="BEED">Bachelor of Elementary Education</option>
-                                            <option value="BSED">Bachelor of Secondary Education</option>
-                                            <option value="BSCrim">Bachelor of Science in Criminology</option>
-                                            <option value="BSA">Bachelor of Science in Business Administration</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-lg-2">
-                                    <div class="form-group">
-                                        <label for="new_student_year" class="required">Year</label>
-                                        <select id="new_student_year" class="custom-select" required>
-                                            <option value selected disabled></option>
-                                            <option value="1st">1st</option>
-                                            <option value="2nd">2nd</option>
-                                            <option value="3rd">3rd</option>
-                                            <option value="4th">4th</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-lg-2">
-                                    <div class="form-group">
-                                        <label for="new_student_section" class="required">Section</label>
-                                        <input type="text" class="form-control" id="new_student_section" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="new_student_first_name" class="required">First Name</label>
-                                        <input type="text" class="form-control" id="new_student_first_name" required>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="new_student_middle_name">Middle Name</label>
-                                        <input type="text" class="form-control" id="new_student_middle_name" required>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="new_student_last_name" class="required">Last Name</label>
-                                        <input type="text" class="form-control" id="new_student_last_name" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="new_student_birthday" class="required">Birthday</label>
-                                        <input type="date" class="form-control" id="new_student_birthday" required>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="new_student_mobile_number" class="required">Mobile Number</label>
-                                        <input type="text" class="form-control" id="new_student_mobile_number" data-inputmask='"mask": "9999 999 9999"' data-mask required>
-                                        <small class="text-danger d-none" id="error_new_student_mobile_number">Invalid Mobile Number</small>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="new_student_email" class="required">Email Address</label>
-                                        <input type="email" class="form-control" id="new_student_email" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <label for="new_student_address" class="required">Address</label>
-                                        <textarea id="new_student_address" class="form-control" required></textarea>
-                                    </div>
-                                </div>
-                            </div>
+        <?php if (session()->get("current_page") == "manage_students"): ?>
+            <!-- New Student Modal -->
+            <div class="modal fade" id="new_student_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="overlay d-none loading">
+                            <i class="fas fa-2x fa-sync fa-spin"></i>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-success" id="new_student_submit">Submit</button>
+                        <div class="modal-header">
+                            <h5 class="modal-title">New Student</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
-                    </form>
+                        <form action="javascript:void(0)" id="new_student_form">
+                            <div class="modal-body">
+                                <div class="text-center mb-3">
+                                    <img id="new_student_image_display" class="rounded-circle" src="<?= base_url() ?>public/dist/img/default-user-image.png" alt="User Image" style="width: 100px; height: 100px;">
+                                </div>
+                                <div class="form-group text-center">
+                                    <label for="new_student_image">Upload Image</label>
+                                    <input type="file" class="form-control-file" id="new_student_image" accept="image/*" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_student_student_number" class="required">Student Number</label>
+                                            <input type="text" class="form-control" id="new_student_student_number" required>
+                                            <small class="text-danger d-none" id="error_new_student_student_number">Student Number is already in use</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_student_course" class="required">Course</label>
+                                            <select id="new_student_course" class="custom-select" required>
+                                                <option value selected disabled></option>
+                                                <?php if ($courses): ?>
+                                                    <?php foreach ($courses as $course): ?>
+                                                        <option value="<?= $course["code"] ?>"><?= $course["title"] ?></option>
+                                                    <?php endforeach ?>
+                                                <?php endif ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <label for="new_student_year" class="required">Year</label>
+                                            <select id="new_student_year" class="custom-select" disabled required>
+                                                <!-- Data from AJAX -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <label for="new_student_section" class="required">Section</label>
+                                            <input type="text" class="form-control" id="new_student_section" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_student_first_name" class="required">First Name</label>
+                                            <input type="text" class="form-control" id="new_student_first_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_student_middle_name">Middle Name</label>
+                                            <input type="text" class="form-control" id="new_student_middle_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_student_last_name" class="required">Last Name</label>
+                                            <input type="text" class="form-control" id="new_student_last_name" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_student_birthday" class="required">Birthday</label>
+                                            <input type="date" class="form-control" id="new_student_birthday" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_student_mobile_number" class="required">Mobile Number</label>
+                                            <input type="text" class="form-control" id="new_student_mobile_number" data-inputmask='"mask": "9999 999 9999"' data-mask required>
+                                            <small class="text-danger d-none" id="error_new_student_mobile_number">Invalid Mobile Number</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_student_email" class="required">Email Address</label>
+                                            <input type="email" class="form-control" id="new_student_email" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label for="new_student_address" class="required">Address</label>
+                                            <textarea id="new_student_address" class="form-control" required></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success" id="new_student_submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Update Student Modal -->
-        <div class="modal fade" id="update_student_modal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="overlay d-none loading">
-                        <i class="fas fa-2x fa-sync fa-spin"></i>
-                    </div>
-                    <div class="modal-header">
-                        <h5 class="modal-title">Update Student</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form action="javascript:void(0)" id="update_student_form">
-                        <div class="modal-body">
-                            <div class="text-center mb-3">
-                                <img id="update_student_image_display" class="rounded-circle" src="<?= base_url() ?>public/dist/img/default-user-image.png" alt="User Image" style="width: 100px; height: 100px;">
-                            </div>
-                            <div class="form-group text-center">
-                                <label for="update_student_image">Upload Image</label>
-                                <input type="file" class="form-control-file" id="update_student_image" accept="image/*">
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="update_student_student_number" class="required">Student Number</label>
-                                        <input type="text" class="form-control" id="update_student_student_number" required>
-                                        <small class="text-danger d-none" id="error_update_student_student_number">Student Number is already in use</small>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="update_student_course" class="required">Course</label>
-                                        <select id="update_student_course" class="custom-select" required>
-                                            <option value="BSIT">Bachelor of Science in Information Technology</option>
-                                            <option value="BSA">Bachelor of Science in Agriculture</option>
-                                            <option value="BEED">Bachelor of Elementary Education</option>
-                                            <option value="BSED">Bachelor of Secondary Education</option>
-                                            <option value="BSCrim">Bachelor of Science in Criminology</option>
-                                            <option value="BSA">Bachelor of Science in Business Administration</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-lg-2">
-                                    <div class="form-group">
-                                        <label for="update_student_year" class="required">Year</label>
-                                        <select id="update_student_year" class="custom-select" required>
-                                            <option value="1st">1st</option>
-                                            <option value="2nd">2nd</option>
-                                            <option value="3rd">3rd</option>
-                                            <option value="4th">4th</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-lg-2">
-                                    <div class="form-group">
-                                        <label for="update_student_section" class="required">Section</label>
-                                        <input type="text" class="form-control" id="update_student_section" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="update_student_first_name" class="required">First Name</label>
-                                        <input type="text" class="form-control" id="update_student_first_name" required>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="update_student_middle_name">Middle Name</label>
-                                        <input type="text" class="form-control" id="update_student_middle_name" required>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="update_student_last_name" class="required">Last Name</label>
-                                        <input type="text" class="form-control" id="update_student_last_name" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="update_student_birthday" class="required">Birthday</label>
-                                        <input type="date" class="form-control" id="update_student_birthday" required>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="update_student_mobile_number" class="required">Mobile Number</label>
-                                        <input type="text" class="form-control" id="update_student_mobile_number" data-inputmask='"mask": "9999 999 9999"' data-mask required>
-                                        <small class="text-danger d-none" id="error_update_student_mobile_number">Invalid Mobile Number</small>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="form-group">
-                                        <label for="update_student_email" class="required">Email Address</label>
-                                        <input type="email" class="form-control" id="update_student_email" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-lg-12">
-                                    <div class="form-group">
-                                        <label for="update_student_address" class="required">Address</label>
-                                        <textarea id="update_student_address" class="form-control" required></textarea>
-                                    </div>
-                                </div>
-                            </div>
+            <!-- Update Student Modal -->
+            <div class="modal fade" id="update_student_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="overlay d-none loading">
+                            <i class="fas fa-2x fa-sync fa-spin"></i>
                         </div>
-                        <div class="modal-footer">
-                            <input type="hidden" id="update_student_id">
-                            <input type="hidden" id="update_student_old_student_number">
-                            <input type="hidden" id="update_student_old_image">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Update Student</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="javascript:void(0)" id="update_student_form">
+                            <div class="modal-body">
+                                <div class="text-center mb-3">
+                                    <img id="update_student_image_display" class="rounded-circle" src="<?= base_url() ?>public/dist/img/default-user-image.png" alt="User Image" style="width: 100px; height: 100px;">
+                                </div>
+                                <div class="form-group text-center">
+                                    <label for="update_student_image">Upload Image</label>
+                                    <input type="file" class="form-control-file" id="update_student_image" accept="image/*">
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_student_student_number" class="required">Student Number</label>
+                                            <input type="text" class="form-control" id="update_student_student_number" required>
+                                            <small class="text-danger d-none" id="error_update_student_student_number">Student Number is already in use</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_student_course" class="required">Course</label>
+                                            <select id="update_student_course" class="custom-select" required>
+                                                <?php if ($courses): ?>
+                                                    <?php foreach ($courses as $course): ?>
+                                                        <option value="<?= $course["code"] ?>"><?= $course["title"] ?></option>
+                                                    <?php endforeach ?>
+                                                <?php endif ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <label for="update_student_year" class="required">Year</label>
+                                            <select id="update_student_year" class="custom-select" required>
+                                                <!-- Data from AJAX -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <label for="update_student_section" class="required">Section</label>
+                                            <input type="text" class="form-control" id="update_student_section" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_student_first_name" class="required">First Name</label>
+                                            <input type="text" class="form-control" id="update_student_first_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_student_middle_name">Middle Name</label>
+                                            <input type="text" class="form-control" id="update_student_middle_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_student_last_name" class="required">Last Name</label>
+                                            <input type="text" class="form-control" id="update_student_last_name" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_student_birthday" class="required">Birthday</label>
+                                            <input type="date" class="form-control" id="update_student_birthday" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_student_mobile_number" class="required">Mobile Number</label>
+                                            <input type="text" class="form-control" id="update_student_mobile_number" data-inputmask='"mask": "9999 999 9999"' data-mask required>
+                                            <small class="text-danger d-none" id="error_update_student_mobile_number">Invalid Mobile Number</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_student_email" class="required">Email Address</label>
+                                            <input type="email" class="form-control" id="update_student_email" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label for="update_student_address" class="required">Address</label>
+                                            <textarea id="update_student_address" class="form-control" required></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="hidden" id="update_student_id">
+                                <input type="hidden" id="update_student_old_student_number">
+                                <input type="hidden" id="update_student_old_image">
 
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-success" id="update_student_submit">Submit</button>
-                        </div>
-                    </form>
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success" id="update_student_submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php endif ?>
+
+        <?php if (session()->get("current_page") == "manage_courses"): ?>
+            <!-- New Course Modal -->
+            <div class="modal fade" id="new_course_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="overlay loading d-none">
+                            <i class="fas fa-2x fa-sync fa-spin"></i>
+                        </div>
+                        <div class="modal-header">
+                            <h5 class="modal-title">New Course</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="javascript:void(0)" id="new_course_form">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="new_course_code">Course Code</label>
+                                    <input type="text" class="form-control" id="new_course_code" required>
+                                    <small class="text-danger d-none" id="error_new_course_code">Course Code is already in use</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_course_title">Course Title</label>
+                                    <input type="text" class="form-control" id="new_course_title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_course_years">Years</label>
+                                    <input type="number" class="form-control" id="new_course_years" required>
+                                    <small class="text-danger d-none" id="error_new_course_years">Years must be greater than zero</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="new_course_submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Course Modal -->
+            <div class="modal fade" id="update_course_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="overlay loading d-none">
+                            <i class="fas fa-2x fa-sync fa-spin"></i>
+                        </div>
+                        <div class="modal-header">
+                            <h5 class="modal-title">Update Course</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="javascript:void(0)" id="update_course_form">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="update_course_code">Course Code</label>
+                                    <input type="text" class="form-control" id="update_course_code" required>
+                                    <small class="text-danger d-none" id="error_update_course_code">Course Code is already in use</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_course_title">Course Title</label>
+                                    <input type="text" class="form-control" id="update_course_title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_course_years">Years</label>
+                                    <input type="number" class="form-control" id="update_course_years" required>
+                                    <small class="text-danger d-none" id="error_update_course_years">Years must be greater than zero</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="hidden" id="update_course_id">
+                                <input type="hidden" id="update_course_old_code">
+
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="update_course_submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endif ?>
+
+        <?php if (session()->get("current_page") == "manage_subjects"): ?>
+            <!-- New Subject Modal -->
+            <div class="modal fade" id="new_subject_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="overlay loading d-none">
+                            <i class="fas fa-2x fa-sync fa-spin"></i>
+                        </div>
+                        <div class="modal-header">
+                            <h5 class="modal-title">New Subject</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="javascript:void(0)" id="new_subject_form">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="new_subject_code">Subject Code</label>
+                                    <input type="text" class="form-control" id="new_subject_code" required>
+                                    <small class="text-danger d-none" id="error_new_subject_code">Subject Code is already in use</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_subject_title">Descriptive Title</label>
+                                    <input type="text" class="form-control" id="new_subject_title" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_subject_lecture_units">Lecture Units</label>
+                                            <input type="number" class="form-control" id="new_subject_lecture_units" required>
+                                            <small class="text-danger d-none" id="error_new_subject_lecture_units">Lecture Units must be equal or greater than zero</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_subject_laboratory_units">Laboratory Units</label>
+                                            <input type="number" class="form-control" id="new_subject_laboratory_units" required>
+                                            <small class="text-danger d-none" id="error_new_subject_laboratory_units">Laboratory Units must be equal or greater than zero</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="new_subject_hours_per_week">Hours/Week</label>
+                                            <input type="number" class="form-control" id="new_subject_hours_per_week" required>
+                                            <small class="text-danger d-none" id="error_new_subject_hours_per_week">Hours per week must be greater than zero</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_subject_pre_requisites">Pre-Requisites</label>
+                                    <select class="select2 w-100" id="new_subject_pre_requisites" multiple="multiple" data-placeholder="Leave blank if none">
+                                        <?php if ($subjects): ?>
+                                            <?php foreach ($subjects as $subject): ?>
+                                                <option value="<?= $subject["code"] ?>"><?= $subject["title"] ?></option>
+                                            <?php endforeach ?>
+                                        <?php endif ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="new_subject_submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Subject Modal -->
+            <div class="modal fade" id="update_subject_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="overlay loading d-none">
+                            <i class="fas fa-2x fa-sync fa-spin"></i>
+                        </div>
+                        <div class="modal-header">
+                            <h5 class="modal-title">Update Subject</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="javascript:void(0)" id="update_subject_form">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="update_subject_code">Subject Code</label>
+                                    <input type="text" class="form-control" id="update_subject_code" required>
+                                    <small class="text-danger d-none" id="error_update_subject_code">Subject Code is already in use</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_subject_title">Descriptive Title</label>
+                                    <input type="text" class="form-control" id="update_subject_title" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_subject_lecture_units">Lecture Units</label>
+                                            <input type="number" class="form-control" id="update_subject_lecture_units" required>
+                                            <small class="text-danger d-none" id="error_update_subject_lecture_units">Lecture Units must be equal or greater than zero</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_subject_laboratory_units">Laboratory Units</label>
+                                            <input type="number" class="form-control" id="update_subject_laboratory_units" required>
+                                            <small class="text-danger d-none" id="error_update_subject_laboratory_units">Laboratory Units must be equal or greater than zero</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label for="update_subject_hours_per_week">Hours/Week</label>
+                                            <input type="number" class="form-control" id="update_subject_hours_per_week" required>
+                                            <small class="text-danger d-none" id="error_update_subject_hours_per_week">Hours per week must be greater than zero</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_subject_pre_requisites">Pre-Requisites</label>
+                                    <select class="select2 w-100" id="update_subject_pre_requisites" multiple="multiple" data-placeholder="Leave blank if none">
+                                        <?php if ($subjects): ?>
+                                            <?php foreach ($subjects as $subject): ?>
+                                                <option value="<?= $subject["code"] ?>"><?= $subject["title"] ?></option>
+                                            <?php endforeach ?>
+                                        <?php endif ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="hidden" id="update_subject_id">
+                                <input type="hidden" id="update_subject_old_code">
+
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="update_subject_submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endif ?>
 
         <script>
             var base_url = "<?= base_url() ?>";
@@ -320,8 +544,9 @@
         <script src="<?= base_url() ?>public/plugins/datatables/js/dataTables.min.js"></script>
         <script src="<?= base_url() ?>public/plugins/datatables/js/dataTables.bootstrap4.min.js"></script>
         <script src="<?= base_url() ?>public/plugins/inputmask/inputmask.min.js"></script>
+        <script src="<?= base_url() ?>public/plugins/select2/js/select2.full.min.js"></script>
         <script src="<?= base_url() ?>public/dist/js/adminlte.min.js"></script>
-        <script src="<?= base_url() ?>public/dist/js/main.js?v=1.0.3"></script>
+        <script src="<?= base_url() ?>public/dist/js/main.js?v=1.0.6"></script>
         </body>
 
         </html>

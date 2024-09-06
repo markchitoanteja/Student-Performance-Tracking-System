@@ -7,12 +7,26 @@ jQuery(document).ready(function () {
         });
     }
 
+    $('.select2').select2();
+
+    $('.select2bs4').select2({
+        theme: 'bootstrap4'
+    })
+
     $('[data-mask]').inputmask();
 
-    $("#datatable").DataTable({
+    $(".datatable").DataTable({
         "paging": true,
         "lengthChange": false,
         "ordering": false
+    })
+
+    $(".clickable_image").click(function () {
+        const src = $(this).attr("src");
+
+        $("#image_container").attr("src", src);
+
+        $("#view_image_modal").modal("show");
     })
 
     $("#mode").click(function () {
@@ -343,6 +357,7 @@ jQuery(document).ready(function () {
         const student_id = $(this).attr("student_id");
 
         $("#update_student_modal").modal("show");
+        $(".loading").removeClass("d-none");
 
         var formData = new FormData();
 
@@ -358,7 +373,6 @@ jQuery(document).ready(function () {
             success: function (response) {
                 $("#update_student_student_number").val(response.student_number);
                 $("#update_student_course").val(response.course);
-                $("#update_student_year").val(response.year);
                 $("#update_student_section").val(response.section);
                 $("#update_student_first_name").val(response.first_name);
                 $("#update_student_middle_name").val(response.middle_name);
@@ -372,6 +386,38 @@ jQuery(document).ready(function () {
                 $("#update_student_id").val(response.id);
                 $("#update_student_old_student_number").val(response.student_number);
                 $("#update_student_old_image").val(response.image);
+
+                var formData_2 = new FormData();
+
+                formData_2.append('code', response.course);
+
+                $.ajax({
+                    url: 'get_course_data_by_code',
+                    data: formData_2,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    processData: false,
+                    contentType: false,
+                    success: function (response_2) {
+                        const years = parseInt(response_2.years);
+
+                        $("#update_student_year").removeAttr("disabled");
+                        $("#update_student_year").empty();
+
+                        for (let i = 1; i <= years; i++) {
+                            const optionText = getOrdinalSuffix(i);
+
+                            $("#update_student_year").append(new Option(optionText, optionText));
+                        }
+
+                        $("#update_student_year").val(response.year);
+
+                        $(".loading").addClass("d-none");
+                    },
+                    error: function (_, _, error) {
+                        console.error(error);
+                    }
+                });
             },
             error: function (_, _, error) {
                 console.error(error);
@@ -501,4 +547,615 @@ jQuery(document).ready(function () {
             });
         }
     })
+
+    $("#new_course_form").submit(function () {
+        const code = $("#new_course_code").val();
+        const title = $("#new_course_title").val();
+        const years = $("#new_course_years").val();
+
+        let errors = 0;
+
+        if (parseInt(years) < 1) {
+            $("#new_course_years").addClass("is-invalid");
+            $("#error_new_course_years").removeClass("d-none");
+
+            errors++;
+        }
+
+        if (!errors) {
+            $("#new_course_submit").text("Please wait...");
+            $("#new_course_submit").attr("disabled", true);
+
+            $(".loading").removeClass("d-none");
+
+            var formData = new FormData();
+
+            formData.append('code', code);
+            formData.append('title', title);
+            formData.append('years', years);
+
+            $.ajax({
+                url: 'add_course',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response) {
+                        location.reload();
+                    } else {
+                        $("#new_course_submit").text("Submit");
+                        $("#new_course_submit").removeAttr("disabled");
+
+                        $(".loading").addClass("d-none");
+
+                        $("#new_course_code").addClass("is-invalid");
+                        $("#error_new_course_code").removeClass("d-none");
+
+                        $("#new_course_code").focus();
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#new_course_years").keydown(function () {
+        $("#new_course_years").removeClass("is-invalid");
+        $("#error_new_course_years").addClass("d-none");
+    })
+
+    $("#new_course_years").change(function () {
+        $("#new_course_years").removeClass("is-invalid");
+        $("#error_new_course_years").addClass("d-none");
+    })
+
+    $("#new_course_code").keydown(function () {
+        $("#new_course_code").removeClass("is-invalid");
+        $("#error_new_course_code").addClass("d-none");
+    })
+
+    $(document).on("click", ".delete_course", function () {
+        const course_id = $(this).attr("course_id");
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var formData = new FormData();
+
+                formData.append('course_id', course_id);
+
+                $.ajax({
+                    url: 'delete_course',
+                    data: formData,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response) {
+                            location.reload();
+                        }
+                    },
+                    error: function (_, _, error) {
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    })
+
+    $(document).on("click", ".edit_course", function () {
+        const course_id = $(this).attr("course_id");
+
+        $("#update_course_modal").modal("show");
+        $(".loading").removeClass("d-none");
+
+        var formData = new FormData();
+
+        formData.append('course_id', course_id);
+
+        $.ajax({
+            url: 'get_course_data',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                $("#update_course_code").val(response.code);
+                $("#update_course_title").val(response.title);
+                $("#update_course_years").val(response.years);
+                $("#update_course_id").val(response.id);
+                $("#update_course_old_code").val(response.code);
+
+                $(".loading").addClass("d-none");
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#update_course_form").submit(function () {
+        const code = $("#update_course_code").val();
+        const title = $("#update_course_title").val();
+        const years = $("#update_course_years").val();
+        const id = $("#update_course_id").val();
+        const old_code = $("#update_course_old_code").val();
+
+        let is_new_code = false;
+        let errors = 0;
+
+        if (parseInt(years) < 1) {
+            $("#update_course_years").addClass("is-invalid");
+            $("#error_update_course_years").removeClass("d-none");
+
+            errors++;
+        }
+
+        if (code != old_code) {
+            is_new_code = true;
+        }
+
+        if (!errors) {
+            $("#update_course_submit").text("Please wait...");
+            $("#update_course_submit").attr("disabled", true);
+
+            $(".loading").removeClass("d-none");
+
+            var formData = new FormData();
+
+            formData.append('id', id);
+            formData.append('code', code);
+            formData.append('title', title);
+            formData.append('years', years);
+            formData.append('is_new_code', is_new_code);
+
+            $.ajax({
+                url: 'update_course',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response) {
+                        location.reload();
+                    } else {
+                        $("#update_course_submit").text("Submit");
+                        $("#update_course_submit").removeAttr("disabled");
+
+                        $(".loading").addClass("d-none");
+
+                        $("#update_course_code").addClass("is-invalid");
+                        $("#error_update_course_code").removeClass("d-none");
+
+                        $("#update_course_code").focus();
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#update_course_years").keydown(function () {
+        $("#update_course_years").removeClass("is-invalid");
+        $("#error_update_course_years").addClass("d-none");
+    })
+
+    $("#update_course_years").change(function () {
+        $("#update_course_years").removeClass("is-invalid");
+        $("#error_update_course_years").addClass("d-none");
+    })
+
+    $("#update_course_code").keydown(function () {
+        $("#update_course_code").removeClass("is-invalid");
+        $("#error_update_course_code").addClass("d-none");
+    })
+
+    $("#new_student_course").change(function () {
+        const code = $(this).val();
+
+        var formData = new FormData();
+
+        formData.append('code', code);
+
+        $.ajax({
+            url: 'get_course_data_by_code',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                const years = parseInt(response.years);
+
+                $("#new_student_year").removeAttr("disabled");
+                $("#new_student_year").empty();
+
+                for (let i = 1; i <= years; i++) {
+                    const optionText = getOrdinalSuffix(i);
+
+                    $("#new_student_year").append(new Option(optionText, optionText));
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#update_student_course").change(function () {
+        const code = $(this).val();
+
+        var formData = new FormData();
+
+        formData.append('code', code);
+
+        $.ajax({
+            url: 'get_course_data_by_code',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                const years = parseInt(response.years);
+
+                $("#update_student_year").removeAttr("disabled");
+                $("#update_student_year").empty();
+
+                for (let i = 1; i <= years; i++) {
+                    const optionText = getOrdinalSuffix(i);
+
+                    $("#update_student_year").append(new Option(optionText, optionText));
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#new_subject_form").submit(function () {
+        const code = $("#new_subject_code").val();
+        const title = $("#new_subject_title").val();
+        const lecture_units = $("#new_subject_lecture_units").val();
+        const laboratory_units = $("#new_subject_laboratory_units").val();
+        const hours_per_week = $("#new_subject_hours_per_week").val();
+        const pre_requisites = $("#new_subject_pre_requisites").val();
+
+        let errors = 0;
+
+        if (parseInt(hours_per_week) < 1) {
+            $("#new_subject_hours_per_week").addClass("is-invalid");
+            $("#error_new_subject_hours_per_week").removeClass("d-none");
+
+            $("#new_subject_hours_per_week").focus();
+
+            errors++;
+        }
+
+        if (parseInt(laboratory_units) < 0) {
+            $("#new_subject_laboratory_units").addClass("is-invalid");
+            $("#error_new_subject_laboratory_units").removeClass("d-none");
+
+            $("#new_subject_laboratory_units").focus();
+
+            errors++;
+        }
+
+        if (parseInt(lecture_units) < 0) {
+            $("#new_subject_lecture_units").addClass("is-invalid");
+            $("#error_new_subject_lecture_units").removeClass("d-none");
+
+            $("#new_subject_lecture_units").focus();
+
+            errors++;
+        }
+
+        if (!errors) {
+            $(".loading").removeClass("d-none");
+
+            $("#new_subject_submit").text("Please wait...");
+            $("#new_subject_submit").attr("disabled", true);
+
+            var formData = new FormData();
+
+            formData.append('code', code);
+            formData.append('title', title);
+            formData.append('title', title);
+            formData.append('lecture_units', lecture_units);
+            formData.append('laboratory_units', laboratory_units);
+            formData.append('hours_per_week', hours_per_week);
+            formData.append('pre_requisites', pre_requisites);
+
+            $.ajax({
+                url: 'add_subject',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response) {
+                        location.reload();
+                    } else {
+                        $(".loading").addClass("d-none");
+
+                        $("#new_subject_submit").text("Submit");
+                        $("#new_subject_submit").removeAttr("disabled");
+
+                        $("#new_subject_code").addClass("is-invalid");
+                        $("#error_new_subject_code").removeClass("d-none");
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#new_subject_code").keydown(function () {
+        $("#new_subject_code").removeClass("is-invalid");
+        $("#error_new_subject_code").addClass("d-none");
+    })
+
+    $("#new_subject_hours_per_week").keydown(function () {
+        $("#new_subject_hours_per_week").removeClass("is-invalid");
+        $("#error_new_subject_hours_per_week").addClass("d-none");
+    })
+
+    $("#new_subject_hours_per_week").change(function () {
+        $("#new_subject_hours_per_week").removeClass("is-invalid");
+        $("#error_new_subject_hours_per_week").addClass("d-none");
+    })
+
+    $("#new_subject_laboratory_units").keydown(function () {
+        $("#new_subject_laboratory_units").removeClass("is-invalid");
+        $("#error_new_subject_laboratory_units").addClass("d-none");
+    })
+
+    $("#new_subject_laboratory_units").change(function () {
+        $("#new_subject_laboratory_units").removeClass("is-invalid");
+        $("#error_new_subject_laboratory_units").addClass("d-none");
+    })
+
+    $("#new_subject_lecture_units").keydown(function () {
+        $("#new_subject_lecture_units").removeClass("is-invalid");
+        $("#error_new_subject_lecture_units").addClass("d-none");
+    })
+
+    $("#new_subject_lecture_units").change(function () {
+        $("#new_subject_lecture_units").removeClass("is-invalid");
+        $("#error_new_subject_lecture_units").addClass("d-none");
+    })
+
+    $(document).on("click", ".delete_subject", function () {
+        const subject_id = $(this).attr("subject_id");
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var formData = new FormData();
+
+                formData.append('subject_id', subject_id);
+
+                $.ajax({
+                    url: 'delete_subject',
+                    data: formData,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response) {
+                            location.reload();
+                        }
+                    },
+                    error: function (_, _, error) {
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    })
+
+    $(document).on("click", ".edit_subject", function () {
+        const subject_id = $(this).attr("subject_id");
+
+        $("#update_subject_modal").modal("show");
+        $(".loading").removeClass("d-none");
+
+        var formData = new FormData();
+
+        formData.append('subject_id', subject_id);
+
+        $.ajax({
+            url: 'get_subject_data',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                $("#update_subject_code").val(response.code);
+                $("#update_subject_title").val(response.title);
+                $("#update_subject_lecture_units").val(response.lecture_units);
+                $("#update_subject_laboratory_units").val(response.laboratory_units);
+                $("#update_subject_hours_per_week").val(response.hours_per_week);
+
+                $('#update_subject_pre_requisites').val(null).trigger('change');
+
+                let preRequisitesArray = response.pre_requisites.split(',');
+
+                $.each(preRequisitesArray, function (_, pre_requisite) {
+                    $('#update_subject_pre_requisites option').filter(function () {
+                        return $(this).val().trim() === pre_requisite.trim();
+                    }).prop('selected', true);
+                });
+
+                $('#update_subject_pre_requisites').trigger('change');
+
+                $("#update_subject_id").val(response.id);
+                $("#update_subject_old_code").val(response.code);
+
+                $(".loading").addClass("d-none");
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#update_subject_form").submit(function () {
+        const code = $("#update_subject_code").val();
+        const title = $("#update_subject_title").val();
+        const lecture_units = $("#update_subject_lecture_units").val();
+        const laboratory_units = $("#update_subject_laboratory_units").val();
+        const hours_per_week = $("#update_subject_hours_per_week").val();
+        const pre_requisites = $("#update_subject_pre_requisites").val();
+        const id = $("#update_subject_id").val();
+        const old_code = $("#update_subject_old_code").val();
+
+        let errors = 0;
+
+        if (parseInt(hours_per_week) < 1) {
+            $("#update_subject_hours_per_week").addClass("is-invalid");
+            $("#error_update_subject_hours_per_week").removeClass("d-none");
+
+            $("#update_subject_hours_per_week").focus();
+
+            errors++;
+        }
+
+        if (parseInt(laboratory_units) < 0) {
+            $("#update_subject_laboratory_units").addClass("is-invalid");
+            $("#error_update_subject_laboratory_units").removeClass("d-none");
+
+            $("#update_subject_laboratory_units").focus();
+
+            errors++;
+        }
+
+        if (parseInt(lecture_units) < 0) {
+            $("#update_subject_lecture_units").addClass("is-invalid");
+            $("#error_update_subject_lecture_units").removeClass("d-none");
+
+            $("#update_subject_lecture_units").focus();
+
+            errors++;
+        }
+
+        if (!errors) {
+            $("#update_subject_submit").text("Please wait...");
+            $("#update_subject_submit").attr("disabled", true);
+
+            $(".loading").removeClass("d-none");
+
+            let is_new_code = false;
+
+            if (code != old_code) {
+                is_new_code = true;
+            }
+
+            var formData = new FormData();
+
+            formData.append('id', id);
+            formData.append('is_new_code', is_new_code);
+            formData.append('code', code);
+            formData.append('title', title);
+            formData.append('lecture_units', lecture_units);
+            formData.append('laboratory_units', laboratory_units);
+            formData.append('hours_per_week', hours_per_week);
+            formData.append('pre_requisites', pre_requisites);
+
+            $.ajax({
+                url: 'update_subject',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response) {
+                        location.reload();
+                    } else {
+                        $(".loading").addClass("d-none");
+
+                        $("#update_subject_submit").text("Submit");
+                        $("#update_subject_submit").removeAttr("disabled");
+
+                        $("#update_subject_code").addClass("is-invalid");
+                        $("#error_update_subject_code").removeClass("d-none");
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#update_subject_code").keydown(function () {
+        $("#update_subject_code").removeClass("is-invalid");
+        $("#error_update_subject_code").addClass("d-none");
+    })
+
+    $("#update_subject_hours_per_week").keydown(function () {
+        $("#update_subject_hours_per_week").removeClass("is-invalid");
+        $("#error_update_subject_hours_per_week").addClass("d-none");
+    })
+
+    $("#update_subject_hours_per_week").change(function () {
+        $("#update_subject_hours_per_week").removeClass("is-invalid");
+        $("#error_update_subject_hours_per_week").addClass("d-none");
+    })
+
+    $("#update_subject_laboratory_units").keydown(function () {
+        $("#update_subject_laboratory_units").removeClass("is-invalid");
+        $("#error_update_subject_laboratory_units").addClass("d-none");
+    })
+
+    $("#update_subject_laboratory_units").change(function () {
+        $("#update_subject_laboratory_units").removeClass("is-invalid");
+        $("#error_update_subject_laboratory_units").addClass("d-none");
+    })
+
+    $("#update_subject_lecture_units").keydown(function () {
+        $("#update_subject_lecture_units").removeClass("is-invalid");
+        $("#error_update_subject_lecture_units").addClass("d-none");
+    })
+
+    $("#update_subject_lecture_units").change(function () {
+        $("#update_subject_lecture_units").removeClass("is-invalid");
+        $("#error_update_subject_lecture_units").addClass("d-none");
+    })
+
+    function getOrdinalSuffix(n) {
+        const s = ["th", "st", "nd", "rd"], v = n % 100;
+
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
 })
