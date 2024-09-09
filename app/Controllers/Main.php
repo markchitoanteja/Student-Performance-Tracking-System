@@ -6,20 +6,31 @@ use App\Models\User_Model;
 use App\Models\Student_Model;
 use App\Models\Course_Model;
 use App\Models\Subject_Model;
+use App\Models\Grade_Model;
+use App\Models\Log_Model;
+use CodeIgniter\Log\Logger;
 
 date_default_timezone_set('Asia/Manila');
 
 class Main extends BaseController
 {
-    public function index()
+    public function dashboard()
     {
         if (session()->get("user_id")) {
             session()->set("current_page", "dashboard");
             session()->set("title", "Dashboard");
 
             $User_Model = new User_Model();
+            $Student_Model = new Student_Model();
+            $Subject_Model = new Subject_Model();
+            $Course_Model = new Course_Model();
+            $Log_Model = new Log_Model();
 
             $data["user_data"] = $User_Model->where('id', session()->get("user_id"))->first();
+            $data["student_count"] = $Student_Model->countAll();
+            $data["subject_count"] = $Subject_Model->countAll();
+            $data["course_count"] = $Course_Model->countAll();
+            $data["logs"] = $Log_Model->select('logs.*, users.name')->join('users', 'users.id = logs.user_id')->orderBy('logs.id', 'DESC')->findAll();
 
             $header = view("templates/header", $data);
             $body = view("main/dashboard_view");
@@ -36,11 +47,11 @@ class Main extends BaseController
         }
     }
 
-    public function manage_students()
+    public function manage_student_records()
     {
         if (session()->get("user_id")) {
-            session()->set("current_page", "manage_students");
-            session()->set("title", "Manage Students");
+            session()->set("current_page", "manage_student_records");
+            session()->set("title", "Manage Student Records");
 
             $User_Model = new User_Model();
             $Student_Model = new Student_Model();
@@ -51,7 +62,7 @@ class Main extends BaseController
             $data["courses"] = $Course_Model->orderBy('code', 'ASC')->findAll();
 
             $header = view("templates/header", $data);
-            $body = view("main/manage_students_view");
+            $body = view("main/manage_student_records_view");
             $footer = view("templates/footer");
 
             return $header . $body . $footer;
@@ -65,11 +76,11 @@ class Main extends BaseController
         }
     }
 
-    public function manage_courses()
+    public function course_management()
     {
         if (session()->get("user_id")) {
-            session()->set("current_page", "manage_courses");
-            session()->set("title", "Manage Courses");
+            session()->set("current_page", "course_management");
+            session()->set("title", "Course Management");
 
             $User_Model = new User_Model();
             $Course_Model = new Course_Model();
@@ -78,7 +89,7 @@ class Main extends BaseController
             $data["courses"] = $Course_Model->orderBy('id', 'DESC')->findAll();
 
             $header = view("templates/header", $data);
-            $body = view("main/manage_courses_view");
+            $body = view("main/course_management_view");
             $footer = view("templates/footer");
 
             return $header . $body . $footer;
@@ -92,20 +103,55 @@ class Main extends BaseController
         }
     }
 
-    public function manage_subjects()
+    public function subject_management()
     {
         if (session()->get("user_id")) {
-            session()->set("current_page", "manage_subjects");
-            session()->set("title", "Manage Subjects");
+            session()->set("current_page", "subject_management");
+            session()->set("title", "Subject Management");
 
             $User_Model = new User_Model();
             $Subject_Model = new Subject_Model();
+            $Course_Model = new Course_Model();
 
             $data["user_data"] = $User_Model->where('id', session()->get("user_id"))->first();
             $data["subjects"] = $Subject_Model->orderBy('id', 'DESC')->findAll();
+            $data["courses"] = $Course_Model->orderBy('code', 'ASC')->findAll();
 
             $header = view("templates/header", $data);
-            $body = view("main/manage_subjects_view");
+            $body = view("main/subject_management_view");
+            $footer = view("templates/footer");
+
+            return $header . $body . $footer;
+        } else {
+            session()->set("notification", array(
+                "type" => "alert-danger",
+                "message" => "You must login first!",
+            ));
+
+            return redirect()->to(base_url());
+        }
+    }
+
+    public function grade_management()
+    {
+        if (session()->get("user_id")) {
+            session()->set("current_page", "grade_management");
+            session()->set("title", "Grade Management");
+
+            $User_Model = new User_Model();
+            $Student_Model = new Student_Model();
+            $Subject_Model = new Subject_Model();
+            $Course_Model = new Course_Model();
+            $Grade_Model = new Grade_Model();
+
+            $data["user_data"] = $User_Model->where('id', session()->get("user_id"))->first();
+            $data["students"] = $Student_Model->orderBy('first_name', 'ASC')->findAll();
+            $data["subjects"] = $Subject_Model->orderBy('code', 'ASC')->findAll();
+            $data["courses"] = $Course_Model->orderBy('code', 'ASC')->findAll();
+            $data["grades"] = $Grade_Model->select('grades.*, students.student_number, students.first_name, students.middle_name, students.last_name')->join('students', 'students.id = grades.student_id')->orderBy('grades.id', 'DESC')->findAll();
+
+            $header = view("templates/header", $data);
+            $body = view("main/grade_management_view");
             $footer = view("templates/footer");
 
             return $header . $body . $footer;
@@ -130,10 +176,16 @@ class Main extends BaseController
                 $User_Model = new User_Model();
                 $Student_Model = new Student_Model();
                 $Course_Model = new Course_Model();
+                $Grade_Model = new Grade_Model();
 
                 $data["user_data"] = $User_Model->where('id', session()->get("user_id"))->first();
                 $data["student_data"] = $Student_Model->where('student_number', $student_number)->first();
                 $data["courses"] = $Course_Model->orderBy('code', 'ASC')->findAll();
+                $data["grades"] = $Grade_Model
+                    ->select('grades.*, subjects.title') // Select fields from both tables
+                    ->join('subjects', 'grades.subject_id = subjects.id') // Join the subjects table
+                    ->where('grades.student_id', $data["student_data"]["id"]) // Filter by student_id
+                    ->findAll();
 
                 $middle_initial = isset($data["student_data"]["middle_name"]) && !empty($data["student_data"]["middle_name"]) ? strtoupper($data["student_data"]["middle_name"][0]) . '. ' : '';
                 $full_name = $data["student_data"]["first_name"] . " " . $middle_initial . $data["student_data"]["last_name"];
@@ -163,6 +215,8 @@ class Main extends BaseController
         $mode = $this->request->getPost("mode");
 
         session()->set("mode", $mode);
+
+        $this->add_log_data(session()->get("user_id"), "Change mode to " . $mode . " mode.");
 
         echo json_encode(true);
     }
@@ -216,6 +270,8 @@ class Main extends BaseController
                 "icon" => "success",
             ));
 
+            $this->add_log_data(session()->get("user_id"), "Added a new student.");
+
             $response = true;
         }
 
@@ -235,6 +291,8 @@ class Main extends BaseController
             "text" => "A student has been successfully deleted from the list.",
             "icon" => "success",
         ));
+
+        $this->add_log_data(session()->get("user_id"), "Deleted a student.");
 
         echo json_encode(true);
     }
@@ -315,6 +373,8 @@ class Main extends BaseController
                 "icon" => "success",
             ));
 
+            $this->add_log_data(session()->get("user_id"), "Updated a student's information.");
+
             $response = true;
         }
 
@@ -352,6 +412,8 @@ class Main extends BaseController
 
             $response = true;
         }
+
+        $this->add_log_data(session()->get("user_id"), "Added a new course.");
 
         echo json_encode($response);
     }
@@ -393,6 +455,8 @@ class Main extends BaseController
                 "icon" => "success",
             ));
 
+            $this->add_log_data(session()->get("user_id"), "Updated a course.");
+
             $response = true;
         }
 
@@ -412,6 +476,8 @@ class Main extends BaseController
             "text" => "A course has been successfully deleted from the list.",
             "icon" => "success",
         ));
+
+        $this->add_log_data(session()->get("user_id"), "Deleted a course.");
 
         echo json_encode(true);
     }
@@ -446,10 +512,13 @@ class Main extends BaseController
         $laboratory_units = $this->request->getPost("laboratory_units");
         $hours_per_week = $this->request->getPost("hours_per_week");
         $pre_requisites = $this->request->getPost("pre_requisites");
+        $course = $this->request->getPost("course");
+        $year = $this->request->getPost("year");
+        $semester = $this->request->getPost("semester");
 
         $Subject_Model = new Subject_Model();
 
-        $subject_data = $Subject_Model->where('code', $code)->first();
+        $subject_data = $Subject_Model->where('code', $code)->where('course', $course)->first();
 
         $response = false;
 
@@ -461,6 +530,9 @@ class Main extends BaseController
                 "laboratory_units" => $laboratory_units,
                 "hours_per_week" => $hours_per_week,
                 "pre_requisites" => $pre_requisites,
+                "course" => $course,
+                "year" => $year,
+                "semester" => $semester,
                 "created_at" => date("Y-m-d H:i:s"),
                 "updated_at" => date("Y-m-d H:i:s"),
             ];
@@ -472,6 +544,8 @@ class Main extends BaseController
                 "text" => "A subject has been successfully added to the list.",
                 "icon" => "success",
             ));
+
+            $this->add_log_data(session()->get("user_id"), "Added a new subject.");
 
             $response = true;
         }
@@ -489,6 +563,9 @@ class Main extends BaseController
         $laboratory_units = $this->request->getPost("laboratory_units");
         $hours_per_week = $this->request->getPost("hours_per_week");
         $pre_requisites = $this->request->getPost("pre_requisites");
+        $course = $this->request->getPost("course");
+        $year = $this->request->getPost("year");
+        $semester = $this->request->getPost("semester");
 
         $Subject_Model = new Subject_Model();
 
@@ -511,6 +588,9 @@ class Main extends BaseController
                 "laboratory_units" => $laboratory_units,
                 "hours_per_week" => $hours_per_week,
                 "pre_requisites" => $pre_requisites,
+                "course" => $course,
+                "year" => $year,
+                "semester" => $semester,
                 "updated_at" => date("Y-m-d H:i:s"),
             ];
 
@@ -521,6 +601,8 @@ class Main extends BaseController
                 "text" => "A subject has been successfully updated.",
                 "icon" => "success",
             ));
+
+            $this->add_log_data(session()->get("user_id"), "Updated a subject's information.");
 
             $response = true;
         }
@@ -542,6 +624,8 @@ class Main extends BaseController
             "icon" => "success",
         ));
 
+        $this->add_log_data(session()->get("user_id"), "Deleted a subject.");
+
         echo json_encode(true);
     }
 
@@ -554,6 +638,169 @@ class Main extends BaseController
         $subject_data = $Subject_Model->where('id', $subject_id)->first();
 
         echo json_encode($subject_data);
+    }
+
+    public function get_subjects()
+    {
+        $course = $this->request->getPost("course");
+        $year = $this->request->getPost("year");
+        $semester = $this->request->getPost("semester");
+
+        $Subject_Model = new Subject_Model();
+
+        $subject_data = $Subject_Model->where('course', $course)->where('year', $year)->where('semester', $semester)->orderBy('title', 'ASC')->findAll();
+
+        echo json_encode($subject_data);
+    }
+
+    public function add_grade()
+    {
+        $student_id = $this->request->getPost("student_id");
+        $course = $this->request->getPost("course");
+        $year = $this->request->getPost("year");
+        $semester = $this->request->getPost("semester");
+        $subject_id = $this->request->getPost("subject_id");
+        $grade = $this->request->getPost("grade");
+
+        $Grade_Model = new Grade_Model();
+
+        $grade_data = $Grade_Model->where('student_id', $student_id)->where('course', $course)->where('year', $year)->where('semester', $semester)->where('subject_id', $subject_id)->first();
+
+        $response = false;
+
+        if (!$grade_data) {
+            $data = [
+                "student_id" => $student_id,
+                "course" => $course,
+                "year" => $year,
+                "semester" => $semester,
+                "subject_id" => $subject_id,
+                "grade" => $grade,
+                "created_at" => date("Y-m-d H:i:s"),
+                "updated_at" => date("Y-m-d H:i:s"),
+            ];
+
+            $Grade_Model->save($data);
+
+            session()->set("notification", array(
+                "title" => "Success!",
+                "text" => "Student's grade has been recorded successfully.",
+                "icon" => "success",
+            ));
+
+            $this->add_log_data(session()->get("user_id"), "Added a new grade to a student.");
+
+            $response = true;
+        }
+
+        echo json_encode($response);
+    }
+
+    public function delete_grade()
+    {
+        $grade_id = $this->request->getPost("grade_id");
+
+        $Grade_Model = new Grade_Model();
+
+        $Grade_Model->delete($grade_id);
+
+        session()->set("notification", array(
+            "title" => "Success!",
+            "text" => "Student's grade has been deleted successfully.",
+            "icon" => "success",
+        ));
+
+        $this->add_log_data(session()->get("user_id"), "Deleted a grade from a student.");
+
+        echo json_encode(true);
+    }
+
+    public function get_grade_data()
+    {
+        $grade_id = $this->request->getPost("grade_id");
+
+        $Grade_Model = new Grade_Model();
+
+        $grade_data = $Grade_Model->where('id', $grade_id)->first();
+
+        echo json_encode($grade_data);
+    }
+
+    public function update_grade()
+    {
+        $id = $this->request->getPost("id");
+        $is_edited = $this->request->getPost("is_edited");
+        $student_id = $this->request->getPost("student_id");
+        $course = $this->request->getPost("course");
+        $year = $this->request->getPost("year");
+        $semester = $this->request->getPost("semester");
+        $subject_id = $this->request->getPost("subject_id");
+        $grade = $this->request->getPost("grade");
+
+        $errors = 0;
+
+        $Grade_Model = new Grade_Model();
+
+        if ($is_edited == "true") {
+            $grade_data = $Grade_Model->where('student_id', $student_id)->where('course', $course)->where('year', $year)->where('semester', $semester)->where('subject_id', $subject_id)->first();
+
+            if ($grade_data) {
+                $errors++;
+            }
+        }
+
+        $response = false;
+
+        if (!$errors) {
+            $data = [
+                "student_id" => $student_id,
+                "course" => $course,
+                "year" => $year,
+                "semester" => $semester,
+                "subject_id" => $subject_id,
+                "grade" => $grade,
+                "updated_at" => date("Y-m-d H:i:s"),
+            ];
+
+            $Grade_Model->update($id, $data);
+
+            session()->set("notification", array(
+                "title" => "Success!",
+                "text" => "Student's grade has been updated successfully.",
+                "icon" => "success",
+            ));
+
+            $this->add_log_data(session()->get("user_id"), "Updated a student's grade.");
+
+            $response = true;
+        }
+
+        echo json_encode($response);
+    }
+
+    public function get_subject_data_by_course()
+    {
+        $course = $this->request->getPost("course");
+
+        $Subject_Model = new Subject_Model();
+
+        $subject_data = $Subject_Model->where('course', $course)->findAll();
+
+        echo json_encode($subject_data);
+    }
+
+    private function add_log_data($user_id, $activity)
+    {
+        $Log_Model = new Log_Model();
+
+        $data = [
+            "user_id" => $user_id,
+            "activity" => $activity,
+            "created_at" => date("Y-m-d H:i:s"),
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        $Log_Model->save($data);
     }
 
     private function upload_image($target_directory, $image_file)

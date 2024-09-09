@@ -69,7 +69,7 @@
             </div>
         </div>
 
-        <?php if (session()->get("current_page") == "manage_students"): ?>
+        <?php if (session()->get("current_page") == "manage_student_records"): ?>
             <!-- New Student Modal -->
             <div class="modal fade" id="new_student_modal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -308,7 +308,7 @@
             </div>
         <?php endif ?>
 
-        <?php if (session()->get("current_page") == "manage_courses"): ?>
+        <?php if (session()->get("current_page") == "course_management"): ?>
             <!-- New Course Modal -->
             <div class="modal fade" id="new_course_modal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
@@ -391,10 +391,10 @@
             </div>
         <?php endif ?>
 
-        <?php if (session()->get("current_page") == "manage_subjects"): ?>
+        <?php if (session()->get("current_page") == "subject_management"): ?>
             <!-- New Subject Modal -->
             <div class="modal fade" id="new_subject_modal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="overlay loading d-none">
                             <i class="fas fa-2x fa-sync fa-spin"></i>
@@ -439,14 +439,43 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="new_subject_course">Course</label>
+                                            <select id="new_subject_course" class="custom-select" required>
+                                                <option value selected disabled></option>
+                                                <?php if ($courses): ?>
+                                                    <?php foreach ($courses as $course): ?>
+                                                        <option value="<?= $course["code"] ?>"><?= $course["title"] ?></option>
+                                                    <?php endforeach ?>
+                                                <?php endif ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label for="new_subject_year" class="required">Year</label>
+                                            <select id="new_subject_year" class="custom-select" disabled required>
+                                                <!-- Data from AJAX -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label for="new_subject_semester" class="required">Semester</label>
+                                            <select id="new_subject_semester" class="custom-select" required>
+                                                <option value selected disabled></option>
+                                                <option value="1st">1st</option>
+                                                <option value="2nd">2nd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="form-group">
                                     <label for="new_subject_pre_requisites">Pre-Requisites</label>
                                     <select class="select2 w-100" id="new_subject_pre_requisites" multiple="multiple" data-placeholder="Leave blank if none">
-                                        <?php if ($subjects): ?>
-                                            <?php foreach ($subjects as $subject): ?>
-                                                <option value="<?= $subject["code"] ?>"><?= $subject["title"] ?></option>
-                                            <?php endforeach ?>
-                                        <?php endif ?>
+                                        <!-- Data from AJAX -->
                                     </select>
                                 </div>
                             </div>
@@ -461,7 +490,7 @@
 
             <!-- Update Subject Modal -->
             <div class="modal fade" id="update_subject_modal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="overlay loading d-none">
                             <i class="fas fa-2x fa-sync fa-spin"></i>
@@ -506,6 +535,37 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label for="update_subject_course">Course</label>
+                                            <select id="update_subject_course" class="custom-select" required>
+                                                <?php if ($courses): ?>
+                                                    <?php foreach ($courses as $course): ?>
+                                                        <option value="<?= $course["code"] ?>"><?= $course["title"] ?></option>
+                                                    <?php endforeach ?>
+                                                <?php endif ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label for="update_subject_year" class="required">Year</label>
+                                            <select id="update_subject_year" class="custom-select" disabled required>
+                                                <!-- Data from AJAX -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label for="update_subject_semester" class="required">Semester</label>
+                                            <select id="update_subject_semester" class="custom-select" required>
+                                                <option value="1st">1st</option>
+                                                <option value="2nd">2nd</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="form-group">
                                     <label for="update_subject_pre_requisites">Pre-Requisites</label>
                                     <select class="select2 w-100" id="update_subject_pre_requisites" multiple="multiple" data-placeholder="Leave blank if none">
@@ -530,6 +590,156 @@
             </div>
         <?php endif ?>
 
+        <?php if (session()->get("current_page") == "grade_management"): ?>
+            <!-- New Grade Modal -->
+            <div class="modal fade" id="new_grade_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="overlay loading d-none">
+                            <i class="fas fa-2x fa-sync fa-spin"></i>
+                        </div>
+                        <div class="modal-header">
+                            <h5 class="modal-title">New Grade</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="javascript:void(0)" id="new_grade_form">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="new_grade_student_id">Student Name</label>
+                                    <select class="custom-select" id="new_grade_student_id" required>
+                                        <option value disabled selected></option>
+                                        <?php if ($students): ?>
+                                            <?php foreach ($students as $student): ?>
+                                                <option value="<?= $student["id"] ?>"><?= $student["first_name"] ?> <?= !empty($student["middle_name"]) ? $student["middle_name"][0] . '.' : '' ?> <?= $student["last_name"] ?></option>
+                                            <?php endforeach ?>
+                                        <?php endif ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_grade_course">Course</label>
+                                    <select class="custom-select" id="new_grade_course" required>
+                                        <option value disabled selected></option>
+                                        <?php if ($courses): ?>
+                                            <?php foreach ($courses as $course): ?>
+                                                <option value="<?= $course["code"] ?>"><?= $course["title"] ?></option>
+                                            <?php endforeach ?>
+                                        <?php endif ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_grade_year">Year</label>
+                                    <select class="custom-select" id="new_grade_year" disabled required>
+                                        <!-- Data from AJAX -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_grade_semester">Semester</label>
+                                    <select class="custom-select" id="new_grade_semester" required>
+                                        <option value disabled selected></option>
+                                        <option value="1st">1st</option>
+                                        <option value="2nd">2nd</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_grade_subject_id">Subject</label>
+                                    <select class="custom-select" id="new_grade_subject_id" disabled required>
+                                        <!-- Data from AJAX -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_grade_grade">Final Grade</label>
+                                    <input type="number" class="form-control" id="new_grade_grade" step="0.1" required>
+                                    <small class="text-danger d-none" id="error_new_grade_grade">Grade must be greater than or equal to 1</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="new_grade_submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Grade Modal -->
+            <div class="modal fade" id="update_grade_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="overlay loading d-none">
+                            <i class="fas fa-2x fa-sync fa-spin"></i>
+                        </div>
+                        <div class="modal-header">
+                            <h5 class="modal-title">Update Grade</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="javascript:void(0)" id="update_grade_form">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="update_grade_student_id">Student Name</label>
+                                    <select class="custom-select" id="update_grade_student_id" required>
+                                        <?php if ($students): ?>
+                                            <?php foreach ($students as $student): ?>
+                                                <option value="<?= $student["id"] ?>"><?= $student["first_name"] ?> <?= !empty($student["middle_name"]) ? $student["middle_name"][0] . '.' : '' ?> <?= $student["last_name"] ?></option>
+                                            <?php endforeach ?>
+                                        <?php endif ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_grade_course">Course</label>
+                                    <select class="custom-select" id="update_grade_course" required>
+                                        <?php if ($courses): ?>
+                                            <?php foreach ($courses as $course): ?>
+                                                <option value="<?= $course["code"] ?>"><?= $course["title"] ?></option>
+                                            <?php endforeach ?>
+                                        <?php endif ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_grade_year">Year</label>
+                                    <select class="custom-select" id="update_grade_year" disabled required>
+                                        <!-- Data from AJAX -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_grade_semester">Semester</label>
+                                    <select class="custom-select" id="update_grade_semester" required>
+                                        <option value="1st">1st</option>
+                                        <option value="2nd">2nd</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_grade_subject_id">Subject</label>
+                                    <select class="custom-select" id="update_grade_subject_id" disabled required>
+                                        <!-- Data from AJAX -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_grade_grade">Final Grade</label>
+                                    <input type="number" class="form-control" id="update_grade_grade" step="0.1" required>
+                                    <small class="text-danger d-none" id="error_update_grade_grade">Grade must be greater than or equal to 1</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="hidden" id="update_grade_id">
+                                <input type="hidden" id="update_grade_old_student_id">
+                                <input type="hidden" id="update_grade_old_course">
+                                <input type="hidden" id="update_grade_old_year">
+                                <input type="hidden" id="update_grade_old_semester">
+                                <input type="hidden" id="update_grade_old_subject_id">
+
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="update_grade_submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endif ?>
+
         <script>
             var base_url = "<?= base_url() ?>";
             var mode = "<?= session()->get("mode") ?>";
@@ -546,7 +756,7 @@
         <script src="<?= base_url() ?>public/plugins/inputmask/inputmask.min.js"></script>
         <script src="<?= base_url() ?>public/plugins/select2/js/select2.full.min.js"></script>
         <script src="<?= base_url() ?>public/dist/js/adminlte.min.js"></script>
-        <script src="<?= base_url() ?>public/dist/js/main.js?v=1.0.6"></script>
+        <script src="<?= base_url() ?>public/dist/js/main.min.js"></script>
         </body>
 
         </html>

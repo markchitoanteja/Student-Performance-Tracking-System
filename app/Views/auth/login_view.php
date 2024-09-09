@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="<?= base_url() ?>public/plugins/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="<?= base_url() ?>public/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
     <link rel="stylesheet" href="<?= base_url() ?>public/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="<?= base_url() ?>public/dist/css/login.css">
+    <link rel="stylesheet" href="<?= base_url() ?>public/dist/css/login.min.css">
 </head>
 
 <body class="hold-transition login-page">
@@ -72,8 +72,7 @@
     <script src="<?= base_url() ?>public/plugins/jquery/jquery.min.js"></script>
     <script src="<?= base_url() ?>public/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="<?= base_url() ?>public/dist/js/adminlte.min.js"></script>
-    <!-- <script src="<?= base_url() ?>public/dist/js/login.min.js"></script> -->
-    <script src="<?= base_url() ?>public/dist/js/login.js"></script>
+    <script src="<?= base_url() ?>public/dist/js/login.min.js"></script>
 </body>
 
 </html>

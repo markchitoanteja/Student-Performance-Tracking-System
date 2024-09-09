@@ -9,10 +9,6 @@ jQuery(document).ready(function () {
 
     $('.select2').select2();
 
-    $('.select2bs4').select2({
-        theme: 'bootstrap4'
-    })
-
     $('[data-mask]').inputmask();
 
     $(".datatable").DataTable({
@@ -20,6 +16,21 @@ jQuery(document).ready(function () {
         "lengthChange": false,
         "ordering": false
     })
+    
+    $(".datatable-no-fiter").DataTable({
+        "filter": false,
+        "paging": true,
+        "lengthChange": false,
+        "ordering": false
+    })
+
+    $('.collapse').on('show.bs.collapse', function () {
+        $('#icon-' + this.id).removeClass('fa-chevron-left').addClass('fa-chevron-down');
+    });
+
+    $('.collapse').on('hide.bs.collapse', function () {
+        $('#icon-' + this.id).removeClass('fa-chevron-down').addClass('fa-chevron-left');
+    });
 
     $(".clickable_image").click(function () {
         const src = $(this).attr("src");
@@ -837,6 +848,9 @@ jQuery(document).ready(function () {
         const laboratory_units = $("#new_subject_laboratory_units").val();
         const hours_per_week = $("#new_subject_hours_per_week").val();
         const pre_requisites = $("#new_subject_pre_requisites").val();
+        const course = $("#new_subject_course").val();
+        const year = $("#new_subject_year").val();
+        const semester = $("#new_subject_semester").val();
 
         let errors = 0;
 
@@ -877,11 +891,13 @@ jQuery(document).ready(function () {
 
             formData.append('code', code);
             formData.append('title', title);
-            formData.append('title', title);
             formData.append('lecture_units', lecture_units);
             formData.append('laboratory_units', laboratory_units);
             formData.append('hours_per_week', hours_per_week);
             formData.append('pre_requisites', pre_requisites);
+            formData.append('course', course);
+            formData.append('year', year);
+            formData.append('semester', semester);
 
             $.ajax({
                 url: 'add_subject',
@@ -1021,6 +1037,41 @@ jQuery(document).ready(function () {
                 $("#update_subject_id").val(response.id);
                 $("#update_subject_old_code").val(response.code);
 
+                $("#update_subject_course").val(response.course);
+                $("#update_subject_semester").val(response.semester);
+
+                var formData_2 = new FormData();
+
+                formData_2.append('code', response.course);
+
+                $.ajax({
+                    url: 'get_course_data_by_code',
+                    data: formData_2,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    processData: false,
+                    contentType: false,
+                    success: function (response_2) {
+                        const years = parseInt(response_2.years);
+
+                        $("#update_subject_year").removeAttr("disabled");
+                        $("#update_subject_year").empty();
+
+                        for (let i = 1; i <= years; i++) {
+                            const optionText = getOrdinalSuffix(i);
+
+                            $("#update_subject_year").append(new Option(optionText, optionText));
+                        }
+
+                        $("#update_subject_year").val(response.year);
+
+                        $(".loading").addClass("d-none");
+                    },
+                    error: function (_, _, error) {
+                        console.error(error);
+                    }
+                });
+
                 $(".loading").addClass("d-none");
             },
             error: function (_, _, error) {
@@ -1036,6 +1087,9 @@ jQuery(document).ready(function () {
         const laboratory_units = $("#update_subject_laboratory_units").val();
         const hours_per_week = $("#update_subject_hours_per_week").val();
         const pre_requisites = $("#update_subject_pre_requisites").val();
+        const course = $("#update_subject_course").val();
+        const year = $("#update_subject_year").val();
+        const semester = $("#update_subject_semester").val();
         const id = $("#update_subject_id").val();
         const old_code = $("#update_subject_old_code").val();
 
@@ -1090,6 +1144,9 @@ jQuery(document).ready(function () {
             formData.append('laboratory_units', laboratory_units);
             formData.append('hours_per_week', hours_per_week);
             formData.append('pre_requisites', pre_requisites);
+            formData.append('course', course);
+            formData.append('year', year);
+            formData.append('semester', semester);
 
             $.ajax({
                 url: 'update_subject',
@@ -1151,6 +1208,773 @@ jQuery(document).ready(function () {
     $("#update_subject_lecture_units").change(function () {
         $("#update_subject_lecture_units").removeClass("is-invalid");
         $("#error_update_subject_lecture_units").addClass("d-none");
+    })
+
+    $("#new_subject_course").change(function () {
+        const code = $(this).val();
+
+        var formData = new FormData();
+
+        formData.append('code', code);
+
+        $.ajax({
+            url: 'get_course_data_by_code',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                const years = parseInt(response.years);
+
+                $("#new_subject_year").removeAttr("disabled");
+                $("#new_subject_year").empty();
+
+                for (let i = 1; i <= years; i++) {
+                    const optionText = getOrdinalSuffix(i);
+
+                    $("#new_subject_year").append(new Option(optionText, optionText));
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+
+        $('#new_subject_pre_requisites').empty();
+
+        var formData_2 = new FormData();
+
+        formData_2.append('course', code);
+
+        $.ajax({
+            url: 'get_subject_data_by_course',
+            data: formData_2,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (responses) {
+                if (responses) {
+                    $('#new_subject_pre_requisites').append('<option value disabled selected></option>');
+
+                    $.each(responses, function (_, response) {
+                        $('#new_subject_pre_requisites').append('<option value="' + response.id + '">' + response.title + '</option>');
+                    });
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#update_subject_course").change(function () {
+        const code = $(this).val();
+
+        var formData = new FormData();
+
+        formData.append('code', code);
+
+        $.ajax({
+            url: 'get_course_data_by_code',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                const years = parseInt(response.years);
+
+                $("#update_subject_year").removeAttr("disabled");
+                $("#update_subject_year").empty();
+
+                for (let i = 1; i <= years; i++) {
+                    const optionText = getOrdinalSuffix(i);
+
+                    $("#update_subject_year").append(new Option(optionText, optionText));
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+
+        $('#update_subject_pre_requisites').empty();
+
+        var formData_2 = new FormData();
+
+        formData_2.append('course', code);
+
+        $.ajax({
+            url: 'get_subject_data_by_course',
+            data: formData_2,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (responses) {
+                if (responses) {
+                    $('#update_subject_pre_requisites').removeAttr("disabled");
+                    $('#update_subject_pre_requisites').append('<option value disabled selected></option>');
+
+                    $.each(responses, function (_, response) {
+                        $('#update_subject_pre_requisites').append('<option value="' + response.id + '">' + response.title + '</option>');
+                    });
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#new_grade_course").change(function () {
+        const code = $(this).val();
+        const year = $("#new_grade_year").val();
+        const semester = $("#new_grade_semester").val();
+
+        $("#new_grade_student_id").removeClass("is-invalid");
+        $("#new_grade_course").removeClass("is-invalid");
+        $("#new_grade_year").removeClass("is-invalid");
+        $("#new_grade_semester").removeClass("is-invalid");
+        $("#new_grade_subject_id").removeClass("is-invalid");
+
+        var formData = new FormData();
+
+        formData.append('code', code);
+
+        $.ajax({
+            url: 'get_course_data_by_code',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                const years = parseInt(response.years);
+
+                $("#new_grade_year").removeAttr("disabled");
+                $("#new_grade_year").empty();
+
+                for (let i = 1; i <= years; i++) {
+                    const optionText = getOrdinalSuffix(i);
+
+                    $("#new_grade_year").append(new Option(optionText, optionText));
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+
+        $('#new_grade_subject_id').empty();
+
+        if (code && year && semester) {
+            var formData_2 = new FormData();
+
+            formData_2.append('course', code);
+            formData_2.append('year', year);
+            formData_2.append('semester', semester);
+
+            $.ajax({
+                url: 'get_subjects',
+                data: formData_2,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (responses) {
+                    if (responses) {
+                        $('#new_grade_subject_id').removeAttr("disabled");
+                        $('#new_grade_subject_id').append('<option value disabled selected></option>');
+
+                        $.each(responses, function (_, response) {
+                            $('#new_grade_subject_id').append('<option value="' + response.id + '">' + response.title + '</option>');
+                        });
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#new_grade_year").change(function () {
+        const course = $("#new_grade_course").val();
+        const year = $("#new_grade_year").val();
+        const semester = $("#new_grade_semester").val();
+
+        $("#new_grade_student_id").removeClass("is-invalid");
+        $("#new_grade_course").removeClass("is-invalid");
+        $("#new_grade_year").removeClass("is-invalid");
+        $("#new_grade_semester").removeClass("is-invalid");
+        $("#new_grade_subject_id").removeClass("is-invalid");
+
+        $('#new_grade_subject_id').empty();
+
+        if (course && year && semester) {
+            var formData = new FormData();
+
+            formData.append('course', course);
+            formData.append('year', year);
+            formData.append('semester', semester);
+
+            $.ajax({
+                url: 'get_subjects',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (responses) {
+                    if (responses) {
+                        $('#new_grade_subject_id').removeAttr("disabled");
+                        $('#new_grade_subject_id').append('<option value disabled selected></option>');
+
+                        $.each(responses, function (_, response) {
+                            $('#new_grade_subject_id').append('<option value="' + response.id + '">' + response.title + '</option>');
+                        });
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#new_grade_semester").change(function () {
+        const course = $("#new_grade_course").val();
+        const year = $("#new_grade_year").val();
+        const semester = $("#new_grade_semester").val();
+
+        $("#new_grade_student_id").removeClass("is-invalid");
+        $("#new_grade_course").removeClass("is-invalid");
+        $("#new_grade_year").removeClass("is-invalid");
+        $("#new_grade_semester").removeClass("is-invalid");
+        $("#new_grade_subject_id").removeClass("is-invalid");
+
+        $('#new_grade_subject_id').empty();
+
+        if (course && year && semester) {
+            var formData = new FormData();
+
+            formData.append('course', course);
+            formData.append('year', year);
+            formData.append('semester', semester);
+
+            $.ajax({
+                url: 'get_subjects',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (responses) {
+                    if (responses) {
+                        $('#new_grade_subject_id').removeAttr("disabled");
+                        $('#new_grade_subject_id').append('<option value disabled selected></option>');
+
+                        $.each(responses, function (_, response) {
+                            $('#new_grade_subject_id').append('<option value="' + response.id + '">' + response.title + '</option>');
+                        });
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#new_grade_form").submit(function () {
+        const student_id = $("#new_grade_student_id").val();
+        const course = $("#new_grade_course").val();
+        const year = $("#new_grade_year").val();
+        const semester = $("#new_grade_semester").val();
+        const subject_id = $("#new_grade_subject_id").val();
+        const grade = $("#new_grade_grade").val();
+
+        if (parseFloat(grade) < 1.0) {
+            $("#new_grade_grade").addClass("is-invalid");
+            $("#error_new_grade_grade").removeClass("d-none");
+
+            $("#new_grade_grade").focus();
+        } else {
+            $(".loading").removeClass("d-none");
+
+            $("#new_grade_submit").text("Please wait...");
+            $("#new_grade_submit").attr("disabled", true);
+
+            var formData = new FormData();
+
+            formData.append('student_id', student_id);
+            formData.append('course', course);
+            formData.append('year', year);
+            formData.append('semester', semester);
+            formData.append('subject_id', subject_id);
+            formData.append('grade', grade);
+
+            $.ajax({
+                url: 'add_grade',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response) {
+                        location.reload();
+                    } else {
+                        $("#new_grade_student_id").addClass("is-invalid");
+                        $("#new_grade_course").addClass("is-invalid");
+                        $("#new_grade_year").addClass("is-invalid");
+                        $("#new_grade_semester").addClass("is-invalid");
+                        $("#new_grade_subject_id").addClass("is-invalid");
+
+                        $(".loading").addClass("d-none");
+
+                        $("#new_grade_submit").text("Submit");
+                        $("#new_grade_submit").removeAttr("disabled");
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#new_grade_grade").keydown(function () {
+        $("#new_grade_grade").removeClass("is-invalid");
+        $("#error_new_grade_grade").addClass("d-none");
+    })
+
+    $("#new_grade_grade").change(function () {
+        $("#new_grade_grade").removeClass("is-invalid");
+        $("#error_new_grade_grade").addClass("d-none");
+    })
+
+    $("#new_grade_student_id").change(function () {
+        $("#new_grade_student_id").removeClass("is-invalid");
+        $("#new_grade_course").removeClass("is-invalid");
+        $("#new_grade_year").removeClass("is-invalid");
+        $("#new_grade_semester").removeClass("is-invalid");
+        $("#new_grade_subject_id").removeClass("is-invalid");
+    })
+
+    $("#new_grade_subject_id").change(function () {
+        $("#new_grade_student_id").removeClass("is-invalid");
+        $("#new_grade_course").removeClass("is-invalid");
+        $("#new_grade_year").removeClass("is-invalid");
+        $("#new_grade_semester").removeClass("is-invalid");
+        $("#new_grade_subject_id").removeClass("is-invalid");
+    })
+
+    $(document).on("click", ".delete_grade", function () {
+        const grade_id = $(this).attr("grade_id");
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var formData = new FormData();
+
+                formData.append('grade_id', grade_id);
+
+                $.ajax({
+                    url: 'delete_grade',
+                    data: formData,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response) {
+                            location.reload();
+                        }
+                    },
+                    error: function (_, _, error) {
+                        console.error(error);
+                    }
+                });
+            }
+        });
+    })
+
+    $(document).on("click", ".edit_grade", function () {
+        const grade_id = $(this).attr("grade_id");
+
+        $("#update_grade_modal").modal("show");
+        $(".loading").removeClass("d-none");
+
+        var formData = new FormData();
+
+        formData.append('grade_id', grade_id);
+
+        $.ajax({
+            url: 'get_grade_data',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                $("#update_grade_student_id").val(response.student_id);
+                $("#update_grade_course").val(response.course);
+
+                var formData_2 = new FormData();
+
+                formData_2.append('code', response.course);
+
+                $.ajax({
+                    url: 'get_course_data_by_code',
+                    data: formData_2,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    processData: false,
+                    contentType: false,
+                    success: function (response_2) {
+                        const years = parseInt(response_2.years);
+
+                        $("#update_grade_year").removeAttr("disabled");
+                        $("#update_grade_year").empty();
+
+                        for (let i = 1; i <= years; i++) {
+                            const optionText = getOrdinalSuffix(i);
+
+                            $("#update_grade_year").append(new Option(optionText, optionText));
+                        }
+
+                        $("#update_grade_year").val(response.year);
+
+                        $(".loading").addClass("d-none");
+                    },
+                    error: function (_, _, error) {
+                        console.error(error);
+                    }
+                });
+
+                $("#update_grade_semester").val(response.semester);
+                $('#update_grade_subject_id').empty();
+
+                const course = response.course;
+                const year = response.year;
+                const semester = response.semester;
+
+                if (course && year && semester) {
+                    var formData_3 = new FormData();
+
+                    formData_3.append('course', course);
+                    formData_3.append('year', year);
+                    formData_3.append('semester', semester);
+
+                    $.ajax({
+                        url: 'get_subjects',
+                        data: formData_3,
+                        type: 'POST',
+                        dataType: 'JSON',
+                        processData: false,
+                        contentType: false,
+                        success: function (responses) {
+                            if (responses) {
+                                $('#update_grade_subject_id').removeAttr("disabled");
+                                $('#update_grade_subject_id').append('<option value disabled selected></option>');
+
+                                $.each(responses, function (_, response_3) {
+                                    $('#update_grade_subject_id').append('<option value="' + response_3.id + '">' + response_3.title + '</option>');
+                                });
+
+                                $('#update_grade_subject_id').val(response.subject_id);
+                            }
+                        },
+                        error: function (_, _, error) {
+                            console.error(error);
+                        }
+                    });
+                }
+
+                $("#update_grade_grade").val(response.grade);
+                $("#update_grade_id").val(response.id);
+                $("#update_grade_old_student_id").val(response.student_id);
+                $("#update_grade_old_course").val(response.course);
+                $("#update_grade_old_year").val(response.year);
+                $("#update_grade_old_semester").val(response.semester);
+                $("#update_grade_old_subject_id").val(response.subject_id);
+
+                $(".loading").addClass("d-none");
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#update_grade_course").change(function () {
+        const code = $(this).val();
+        const year = $("#update_grade_year").val();
+        const semester = $("#update_grade_semester").val();
+
+        $("#update_grade_student_id").removeClass("is-invalid");
+        $("#update_grade_course").removeClass("is-invalid");
+        $("#update_grade_year").removeClass("is-invalid");
+        $("#update_grade_semester").removeClass("is-invalid");
+        $("#update_grade_subject_id").removeClass("is-invalid");
+
+        var formData = new FormData();
+
+        formData.append('code', code);
+
+        $.ajax({
+            url: 'get_course_data_by_code',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                const years = parseInt(response.years);
+
+                $("#update_grade_year").removeAttr("disabled");
+                $("#update_grade_year").empty();
+
+                for (let i = 1; i <= years; i++) {
+                    const optionText = getOrdinalSuffix(i);
+
+                    $("#update_grade_year").append(new Option(optionText, optionText));
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+
+        $('#update_grade_subject_id').empty();
+
+        if (code && year && semester) {
+            var formData_2 = new FormData();
+
+            formData_2.append('course', code);
+            formData_2.append('year', year);
+            formData_2.append('semester', semester);
+
+            $.ajax({
+                url: 'get_subjects',
+                data: formData_2,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (responses) {
+                    if (responses) {
+                        $('#update_grade_subject_id').removeAttr("disabled");
+                        $('#update_grade_subject_id').append('<option value disabled selected></option>');
+
+                        $.each(responses, function (_, response) {
+                            $('#update_grade_subject_id').append('<option value="' + response.id + '">' + response.title + '</option>');
+                        });
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#update_grade_year").change(function () {
+        const course = $("#update_grade_course").val();
+        const year = $("#update_grade_year").val();
+        const semester = $("#update_grade_semester").val();
+
+        $("#update_grade_student_id").removeClass("is-invalid");
+        $("#update_grade_course").removeClass("is-invalid");
+        $("#update_grade_year").removeClass("is-invalid");
+        $("#update_grade_semester").removeClass("is-invalid");
+        $("#update_grade_subject_id").removeClass("is-invalid");
+
+        $('#update_grade_subject_id').empty();
+
+        if (course && year && semester) {
+            var formData = new FormData();
+
+            formData.append('course', course);
+            formData.append('year', year);
+            formData.append('semester', semester);
+
+            $.ajax({
+                url: 'get_subjects',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (responses) {
+                    if (responses) {
+                        $('#update_grade_subject_id').removeAttr("disabled");
+                        $('#update_grade_subject_id').append('<option value disabled selected></option>');
+
+                        $.each(responses, function (_, response) {
+                            $('#update_grade_subject_id').append('<option value="' + response.id + '">' + response.title + '</option>');
+                        });
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#update_grade_semester").change(function () {
+        const course = $("#update_grade_course").val();
+        const year = $("#update_grade_year").val();
+        const semester = $("#update_grade_semester").val();
+
+        $("#update_grade_student_id").removeClass("is-invalid");
+        $("#update_grade_course").removeClass("is-invalid");
+        $("#update_grade_year").removeClass("is-invalid");
+        $("#update_grade_semester").removeClass("is-invalid");
+        $("#update_grade_subject_id").removeClass("is-invalid");
+
+        $('#update_grade_subject_id').empty();
+
+        if (course && year && semester) {
+            var formData = new FormData();
+
+            formData.append('course', course);
+            formData.append('year', year);
+            formData.append('semester', semester);
+
+            $.ajax({
+                url: 'get_subjects',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (responses) {
+                    if (responses) {
+                        $('#update_grade_subject_id').removeAttr("disabled");
+                        $('#update_grade_subject_id').append('<option value disabled selected></option>');
+
+                        $.each(responses, function (_, response) {
+                            $('#update_grade_subject_id').append('<option value="' + response.id + '">' + response.title + '</option>');
+                        });
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
+    })
+
+    $("#update_grade_grade").keydown(function () {
+        $("#update_grade_grade").removeClass("is-invalid");
+        $("#error_update_grade_grade").addClass("d-none");
+    })
+
+    $("#update_grade_grade").change(function () {
+        $("#update_grade_grade").removeClass("is-invalid");
+        $("#error_update_grade_grade").addClass("d-none");
+    })
+
+    $("#update_grade_student_id").change(function () {
+        $("#update_grade_student_id").removeClass("is-invalid");
+        $("#update_grade_course").removeClass("is-invalid");
+        $("#update_grade_year").removeClass("is-invalid");
+        $("#update_grade_semester").removeClass("is-invalid");
+        $("#update_grade_subject_id").removeClass("is-invalid");
+    })
+
+    $("#update_grade_subject_id").change(function () {
+        $("#update_grade_student_id").removeClass("is-invalid");
+        $("#update_grade_course").removeClass("is-invalid");
+        $("#update_grade_year").removeClass("is-invalid");
+        $("#update_grade_semester").removeClass("is-invalid");
+        $("#update_grade_subject_id").removeClass("is-invalid");
+    })
+
+    $("#update_grade_form").submit(function () {
+        const student_id = $("#update_grade_student_id").val();
+        const course = $("#update_grade_course").val();
+        const year = $("#update_grade_year").val();
+        const semester = $("#update_grade_semester").val();
+        const subject_id = $("#update_grade_subject_id").val();
+        const grade = $("#update_grade_grade").val();
+
+        const id = $("#update_grade_id").val();
+        const old_student_id = $("#update_grade_old_student_id").val();
+        const old_course = $("#update_grade_old_course").val();
+        const old_year = $("#update_grade_old_year").val();
+        const old_semester = $("#update_grade_old_semester").val();
+        const old_subject_id = $("#update_grade_old_subject_id").val();
+
+        let is_edited = false;
+
+        if ((student_id != old_student_id) || (course != old_course) || (year != old_year) || (semester != old_semester) || (subject_id != old_subject_id)) {
+            is_edited = true;
+        }
+
+        if (parseFloat(grade) < 1.0) {
+            $("#update_grade_grade").addClass("is-invalid");
+            $("#error_update_grade_grade").removeClass("d-none");
+
+            $("#update_grade_grade").focus();
+        } else {
+            $(".loading").removeClass("d-none");
+
+            $("#update_grade_submit").text("Please wait...");
+            $("#update_grade_submit").attr("disabled", true);
+
+            var formData = new FormData();
+
+            formData.append('id', id);
+            formData.append('is_edited', is_edited);
+            formData.append('student_id', student_id);
+            formData.append('course', course);
+            formData.append('year', year);
+            formData.append('semester', semester);
+            formData.append('subject_id', subject_id);
+            formData.append('grade', grade);
+
+            $.ajax({
+                url: 'update_grade',
+                data: formData,
+                type: 'POST',
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response) {
+                        location.reload();
+                    } else {
+                        $("#update_grade_student_id").addClass("is-invalid");
+                        $("#update_grade_course").addClass("is-invalid");
+                        $("#update_grade_year").addClass("is-invalid");
+                        $("#update_grade_semester").addClass("is-invalid");
+                        $("#update_grade_subject_id").addClass("is-invalid");
+
+                        $(".loading").addClass("d-none");
+
+                        $("#update_grade_submit").text("Submit");
+                        $("#update_grade_submit").removeAttr("disabled");
+                    }
+                },
+                error: function (_, _, error) {
+                    console.error(error);
+                }
+            });
+        }
     })
 
     function getOrdinalSuffix(n) {

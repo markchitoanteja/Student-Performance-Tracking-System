@@ -61,17 +61,60 @@
                     <div class="card card-primary">
                         <div class="card-header">
                             <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Grades</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
+                            <?php if ($grades): ?>
+                                <?php
+                                $groupedGrades = [];
 
-                        </div>
-                    </div>
-                    <div class="card card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-trophy mr-1"></i> Awards</h3>
-                        </div>
-                        <div class="card-body">
+                                foreach ($grades as $grade) {
+                                    $year = $grade['year'];
+                                    $semester = $grade['semester'];
 
+                                    $groupedGrades[$year][$semester][] = $grade;
+                                }
+
+                                $counter = 0;
+                                ?>
+
+                                <?php foreach ($groupedGrades as $year => $semesters): ?>
+                                    <?php
+                                    $counter++;
+                                    $collapseId = "collapseYear{$counter}";
+                                    ?>
+
+                                    <div class="mb-4">
+                                        <h4 class="text-primary font-weight-bold">
+                                            <?= $year ?> Year
+                                            <a data-toggle="collapse" href="#<?= $collapseId ?>" role="button" aria-expanded="true" aria-controls="<?= $collapseId ?>" class="collapse-toggle">
+                                                <i class="fas fa-chevron-down float-right" id="icon-<?= $collapseId ?>"></i>
+                                            </a>
+                                        </h4>
+
+                                        <div class="collapse show" id="<?= $collapseId ?>">
+                                            <?php foreach ($semesters as $semester => $subjects): ?>
+                                                <h5 class="text-secondary"><?= $semester ?> Semester</h5>
+
+                                                <ul class="list-group mb-3">
+                                                    <?php foreach ($subjects as $subject): ?>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span><?= $subject['title'] ?></span>
+                                                            <span class="badge badge-info badge-pill"><?= $subject['grade'] ?></span>
+                                                        </li>
+                                                    <?php endforeach ?>
+                                                </ul>
+                                            <?php endforeach ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach ?>
+                            <?php else: ?>
+                                <h1 class="p-5 text-center text-muted">No Grades Yet</h1>
+                            <?php endif ?>
                         </div>
                     </div>
                 </div>

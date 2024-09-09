@@ -4,20 +4,17 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class Subject_Model extends Model
+class Grade_Model extends Model
 {
-    protected $table = "subjects";
+    protected $table = "grades";
     protected $primary_key = "id";
     protected $allowedFields = [
-        'code',
-        'title',
-        'lecture_units',
-        'laboratory_units',
-        'hours_per_week',
-        'pre_requisites',
+        'student_id',
+        'subject_id',
         'course',
         'year',
         'semester',
+        'grade',
         'created_at',
         'updated_at',
     ];

@@ -80,33 +80,27 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= base_url() ?>manage_students" class="nav-link <?= session()->get("current_page") == "manage_students" ? "active" : null ?>">
+                            <a href="<?= base_url() ?>manage_student_records" class="nav-link <?= session()->get("current_page") == "manage_student_records" ? "active" : null ?>">
                                 <i class="nav-icon fas fa-user-graduate"></i>
-                                <p>Manage Students</p>
+                                <p>Manage Student Records</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= base_url() ?>manage_courses" class="nav-link <?= session()->get("current_page") == "manage_courses" ? "active" : null ?>">
+                            <a href="<?= base_url() ?>course_management" class="nav-link <?= session()->get("current_page") == "course_management" ? "active" : null ?>">
                                 <i class="nav-icon fas fa-book-open"></i>
-                                <p>Manage Courses</p>
+                                <p>Course Management</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= base_url() ?>manage_subjects" class="nav-link <?= session()->get("current_page") == "manage_subjects" ? "active" : null ?>">
+                            <a href="<?= base_url() ?>subject_management" class="nav-link <?= session()->get("current_page") == "subject_management" ? "active" : null ?>">
                                 <i class="nav-icon fas fa-book"></i>
-                                <p>Manage Subjects</p>
+                                <p>Subject Management</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="<?= base_url() ?>manage_grades" class="nav-link <?= session()->get("current_page") == "manage_grades" ? "active" : null ?>">
+                            <a href="<?= base_url() ?>grade_management" class="nav-link <?= session()->get("current_page") == "grade_management" ? "active" : null ?>">
                                 <i class="nav-icon fas fa-chart-line"></i>
-                                <p>Manage Grades</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="<?= base_url() ?>manage_awards" class="nav-link <?= session()->get("current_page") == "manage_awards" ? "active" : null ?>">
-                                <i class="nav-icon fas fa-trophy"></i>
-                                <p>Manage Awards</p>
+                                <p>Grade Management</p>
                             </a>
                         </li>
                         <li class="nav-item">

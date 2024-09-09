@@ -6,11 +6,12 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 $routes->get('/', 'Auth::index');
-$routes->get('/dashboard', 'Main::index');
-$routes->get('/manage_students', 'Main::manage_students');
+$routes->get('/dashboard', 'Main::dashboard');
+$routes->get('/manage_student_records', 'Main::manage_student_records');
 $routes->get('/student_profile', 'Main::student_profile');
-$routes->get('/manage_courses', 'Main::manage_courses');
-$routes->get('/manage_subjects', 'Main::manage_subjects');
+$routes->get('/course_management', 'Main::course_management');
+$routes->get('/subject_management', 'Main::subject_management');
+$routes->get('/grade_management', 'Main::grade_management');
 
 $routes->post('/get_user_details', 'Auth::get_user_details');
 $routes->post('/change_mode', 'Main::change_mode');
@@ -30,3 +31,9 @@ $routes->post('/add_subject', 'Main::add_subject');
 $routes->post('/delete_subject', 'Main::delete_subject');
 $routes->post('/get_subject_data', 'Main::get_subject_data');
 $routes->post('/update_subject', 'Main::update_subject');
+$routes->post('/get_subjects', 'Main::get_subjects');
+$routes->post('/add_grade', 'Main::add_grade');
+$routes->post('/delete_grade', 'Main::delete_grade');
+$routes->post('/get_grade_data', 'Main::get_grade_data');
+$routes->post('/update_grade', 'Main::update_grade');
+$routes->post('/get_subject_data_by_course', 'Main::get_subject_data_by_course');

@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\User_Model;
+use App\Models\Log_Model;
 
 date_default_timezone_set('Asia/Manila');
 
@@ -42,6 +43,8 @@ class Auth extends BaseController
                 }
 
                 session()->set("user_id", $user_data["id"]);
+
+                $this->add_log_data(session()->get("user_id"), "Logged in to the system.");
 
                 $response = true;
             }
@@ -98,11 +101,15 @@ class Auth extends BaseController
             "icon" => "success",
         ));
 
+        $this->add_log_data(session()->get("user_id"), "Updated account information.");
+
         echo json_encode(true);
     }
 
     public function logout()
     {
+        $this->add_log_data(session()->get("user_id"), "Logged out from the system");
+
         session()->remove("user_id");
 
         session()->set("notification", array(
@@ -111,6 +118,20 @@ class Auth extends BaseController
         ));
 
         echo json_encode(true);
+    }
+
+    private function add_log_data($user_id, $activity)
+    {
+        $Log_Model = new Log_Model();
+
+        $data = [
+            "user_id" => $user_id,
+            "activity" => $activity,
+            "created_at" => date("Y-m-d H:i:s"),
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        $Log_Model->save($data);
     }
 
     private function upload_image($target_directory, $image_file)
