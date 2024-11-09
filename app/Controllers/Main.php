@@ -171,7 +171,7 @@ class Main extends BaseController
 
         if ($student_number) {
             if (session()->get("user_id")) {
-                session()->set("current_page", "manage_students");
+                session()->set("current_page", "manage_student_records");
 
                 $User_Model = new User_Model();
                 $Student_Model = new Student_Model();
@@ -511,7 +511,6 @@ class Main extends BaseController
         $lecture_units = $this->request->getPost("lecture_units");
         $laboratory_units = $this->request->getPost("laboratory_units");
         $hours_per_week = $this->request->getPost("hours_per_week");
-        $pre_requisites = $this->request->getPost("pre_requisites");
         $course = $this->request->getPost("course");
         $year = $this->request->getPost("year");
         $semester = $this->request->getPost("semester");
@@ -529,7 +528,6 @@ class Main extends BaseController
                 "lecture_units" => $lecture_units,
                 "laboratory_units" => $laboratory_units,
                 "hours_per_week" => $hours_per_week,
-                "pre_requisites" => $pre_requisites,
                 "course" => $course,
                 "year" => $year,
                 "semester" => $semester,
@@ -562,7 +560,6 @@ class Main extends BaseController
         $lecture_units = $this->request->getPost("lecture_units");
         $laboratory_units = $this->request->getPost("laboratory_units");
         $hours_per_week = $this->request->getPost("hours_per_week");
-        $pre_requisites = $this->request->getPost("pre_requisites");
         $course = $this->request->getPost("course");
         $year = $this->request->getPost("year");
         $semester = $this->request->getPost("semester");
@@ -587,7 +584,6 @@ class Main extends BaseController
                 "lecture_units" => $lecture_units,
                 "laboratory_units" => $laboratory_units,
                 "hours_per_week" => $hours_per_week,
-                "pre_requisites" => $pre_requisites,
                 "course" => $course,
                 "year" => $year,
                 "semester" => $semester,

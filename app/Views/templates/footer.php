@@ -472,12 +472,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="new_subject_pre_requisites">Pre-Requisites</label>
-                                    <select class="select2 w-100" id="new_subject_pre_requisites" multiple="multiple" data-placeholder="Leave blank if none">
-                                        <!-- Data from AJAX -->
-                                    </select>
-                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -565,16 +559,6 @@
                                             </select>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="update_subject_pre_requisites">Pre-Requisites</label>
-                                    <select class="select2 w-100" id="update_subject_pre_requisites" multiple="multiple" data-placeholder="Leave blank if none">
-                                        <?php if ($subjects): ?>
-                                            <?php foreach ($subjects as $subject): ?>
-                                                <option value="<?= $subject["code"] ?>"><?= $subject["title"] ?></option>
-                                            <?php endforeach ?>
-                                        <?php endif ?>
-                                    </select>
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -756,7 +740,7 @@
         <script src="<?= base_url() ?>public/plugins/inputmask/inputmask.min.js"></script>
         <script src="<?= base_url() ?>public/plugins/select2/js/select2.full.min.js"></script>
         <script src="<?= base_url() ?>public/dist/js/adminlte.min.js"></script>
-        <script src="<?= base_url() ?>public/dist/js/main.min.js"></script>
+        <script src="<?= base_url() ?>public/dist/js/main.js?v=1.1.4"></script>
         </body>
 
         </html>

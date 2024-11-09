@@ -847,7 +847,6 @@ jQuery(document).ready(function () {
         const lecture_units = $("#new_subject_lecture_units").val();
         const laboratory_units = $("#new_subject_laboratory_units").val();
         const hours_per_week = $("#new_subject_hours_per_week").val();
-        const pre_requisites = $("#new_subject_pre_requisites").val();
         const course = $("#new_subject_course").val();
         const year = $("#new_subject_year").val();
         const semester = $("#new_subject_semester").val();
@@ -894,7 +893,6 @@ jQuery(document).ready(function () {
             formData.append('lecture_units', lecture_units);
             formData.append('laboratory_units', laboratory_units);
             formData.append('hours_per_week', hours_per_week);
-            formData.append('pre_requisites', pre_requisites);
             formData.append('course', course);
             formData.append('year', year);
             formData.append('semester', semester);
@@ -1022,18 +1020,6 @@ jQuery(document).ready(function () {
                 $("#update_subject_laboratory_units").val(response.laboratory_units);
                 $("#update_subject_hours_per_week").val(response.hours_per_week);
 
-                $('#update_subject_pre_requisites').val(null).trigger('change');
-
-                let preRequisitesArray = response.pre_requisites.split(',');
-
-                $.each(preRequisitesArray, function (_, pre_requisite) {
-                    $('#update_subject_pre_requisites option').filter(function () {
-                        return $(this).val().trim() === pre_requisite.trim();
-                    }).prop('selected', true);
-                });
-
-                $('#update_subject_pre_requisites').trigger('change');
-
                 $("#update_subject_id").val(response.id);
                 $("#update_subject_old_code").val(response.code);
 
@@ -1086,7 +1072,6 @@ jQuery(document).ready(function () {
         const lecture_units = $("#update_subject_lecture_units").val();
         const laboratory_units = $("#update_subject_laboratory_units").val();
         const hours_per_week = $("#update_subject_hours_per_week").val();
-        const pre_requisites = $("#update_subject_pre_requisites").val();
         const course = $("#update_subject_course").val();
         const year = $("#update_subject_year").val();
         const semester = $("#update_subject_semester").val();
@@ -1143,7 +1128,6 @@ jQuery(document).ready(function () {
             formData.append('lecture_units', lecture_units);
             formData.append('laboratory_units', laboratory_units);
             formData.append('hours_per_week', hours_per_week);
-            formData.append('pre_requisites', pre_requisites);
             formData.append('course', course);
             formData.append('year', year);
             formData.append('semester', semester);

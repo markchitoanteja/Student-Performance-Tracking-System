@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `student_performace_tracking_system`
+-- Database: `student_performance_tracking_system`
 --
 
 -- --------------------------------------------------------
@@ -105,7 +105,6 @@ CREATE TABLE `subjects` (
   `lecture_units` int(11) NOT NULL,
   `laboratory_units` int(11) NOT NULL,
   `hours_per_week` int(11) NOT NULL,
-  `pre_requisites` varchar(255) NOT NULL,
   `course` varchar(255) NOT NULL,
   `year` varchar(255) NOT NULL,
   `semester` varchar(255) NOT NULL,
