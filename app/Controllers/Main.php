@@ -7,8 +7,8 @@ use App\Models\Student_Model;
 use App\Models\Course_Model;
 use App\Models\Subject_Model;
 use App\Models\Grade_Model;
+use App\Models\Achievement_Model;
 use App\Models\Log_Model;
-use CodeIgniter\Log\Logger;
 
 date_default_timezone_set('Asia/Manila');
 
@@ -177,15 +177,13 @@ class Main extends BaseController
                 $Student_Model = new Student_Model();
                 $Course_Model = new Course_Model();
                 $Grade_Model = new Grade_Model();
+                $Achievement_Model = new Achievement_Model();
 
+                $data["achievements"] = $Achievement_Model->where("student_number", $student_number)->orderBy('date_awarded', 'DESC')->findAll();
                 $data["user_data"] = $User_Model->where('id', session()->get("user_id"))->first();
                 $data["student_data"] = $Student_Model->where('student_number', $student_number)->first();
                 $data["courses"] = $Course_Model->orderBy('code', 'ASC')->findAll();
-                $data["grades"] = $Grade_Model
-                    ->select('grades.*, subjects.title') // Select fields from both tables
-                    ->join('subjects', 'grades.subject_id = subjects.id') // Join the subjects table
-                    ->where('grades.student_id', $data["student_data"]["id"]) // Filter by student_id
-                    ->findAll();
+                $data["grades"] = $Grade_Model->select('grades.*, subjects.title')->join('subjects', 'grades.subject_id = subjects.id')->where('grades.student_id', $data["student_data"]["id"])->findAll();
 
                 $middle_initial = isset($data["student_data"]["middle_name"]) && !empty($data["student_data"]["middle_name"]) ? strtoupper($data["student_data"]["middle_name"][0]) . '. ' : '';
                 $full_name = $data["student_data"]["first_name"] . " " . $middle_initial . $data["student_data"]["last_name"];
@@ -207,6 +205,34 @@ class Main extends BaseController
             }
         } else {
             return redirect()->to(base_url() . "manage_students");
+        }
+    }
+
+    public function student_achievements()
+    {
+        if (session()->get("user_id")) {
+            session()->set("current_page", "student_achievements");
+
+            $User_Model = new User_Model();
+            $Student_Model = new Student_Model();
+            $Achievement_Model = new Achievement_Model();
+
+            $data["achievements"] = $Achievement_Model->orderBy('date_awarded', 'DESC')->findAll();
+            $data["user_data"] = $User_Model->where('id', session()->get("user_id"))->first();
+            $data["students"] = $Student_Model->orderBy('first_name', 'ASC')->findAll();
+
+            $header = view("templates/header", $data);
+            $body = view("main/student_achievements_view");
+            $footer = view("templates/footer");
+
+            return $header . $body . $footer;
+        } else {
+            session()->set("notification", array(
+                "type" => "alert-danger",
+                "message" => "You must login first!",
+            ));
+
+            return redirect()->to(base_url());
         }
     }
 
@@ -306,6 +332,17 @@ class Main extends BaseController
         $student_data = $Student_Model->where('id', $student_id)->first();
 
         echo json_encode($student_data);
+    }
+
+    public function get_achievement_data()
+    {
+        $id = $this->request->getPost("id");
+
+        $Achievement_Model = new Achievement_Model();
+
+        $achievement_data = $Achievement_Model->where('id', $id)->first();
+
+        echo json_encode($achievement_data);
     }
 
     public function update_student()
@@ -783,6 +820,91 @@ class Main extends BaseController
         $subject_data = $Subject_Model->where('course', $course)->findAll();
 
         echo json_encode($subject_data);
+    }
+
+    public function new_achievement()
+    {
+        $student_number = $this->request->getPost("student_number");
+        $title = $this->request->getPost("title");
+        $description = $this->request->getPost("description");
+        $date_awarded = $this->request->getPost("date_awarded");
+
+        $Achievement_Model = new Achievement_Model();
+
+        $data = [
+            "student_number" => $student_number,
+            "title" => $title,
+            "description" => $description,
+            "date_awarded" => $date_awarded,
+            "created_at" => date("Y-m-d H:i:s"),
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        $Achievement_Model->save($data);
+
+        session()->set("notification", array(
+            "title" => "Success!",
+            "text" => "An achievement has been recorded successfully.",
+            "icon" => "success",
+        ));
+
+        $this->add_log_data(session()->get("user_id"), "Added a new achievement to a student.");
+
+        $response = true;
+
+        echo json_encode($response);
+    }
+
+    public function update_achievement()
+    {
+        $id = $this->request->getPost("id");
+        $student_number = $this->request->getPost("student_number");
+        $title = $this->request->getPost("title");
+        $description = $this->request->getPost("description");
+        $date_awarded = $this->request->getPost("date_awarded");
+
+        $Achievement_Model = new Achievement_Model();
+
+        $data = [
+            "student_number" => $student_number,
+            "title" => $title,
+            "description" => $description,
+            "date_awarded" => $date_awarded,
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        $Achievement_Model->update($id, $data);
+
+        session()->set("notification", array(
+            "title" => "Success!",
+            "text" => "An achievement has been updated successfully.",
+            "icon" => "success",
+        ));
+
+        $this->add_log_data(session()->get("user_id"), "Achievement has been updated.");
+
+        $response = true;
+
+        echo json_encode($response);
+    }
+
+    public function delete_achievement()
+    {
+        $id = $this->request->getPost("id");
+
+        $Achievement_Model = new Achievement_Model();
+
+        $Achievement_Model->delete($id);
+
+        session()->set("notification", array(
+            "title" => "Success!",
+            "text" => "Achievement has been deleted successfully.",
+            "icon" => "success",
+        ));
+
+        $this->add_log_data(session()->get("user_id"), "Deleted a grade from a student.");
+
+        echo json_encode(true);
     }
 
     private function add_log_data($user_id, $activity)

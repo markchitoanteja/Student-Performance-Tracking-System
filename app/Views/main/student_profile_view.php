@@ -23,7 +23,7 @@
                     <div class="card card-primary card-outline">
                         <div class="card-body box-profile">
                             <div class="text-center">
-                                <img class="profile-user-img img-fluid img-circle clickable_image" src="<?= base_url() ?>public/dist/img/uploads/students/<?= $student_data["image"] ?>" alt="User profile picture" role="button">
+                                <img class="profile-user-img img-fluid img-circle clickable_image" src="<?= base_url() ?>public/dist/img/uploads/students/<?= $student_data["image"] ?>" style="aspect-ratio: 1 / 1;" alt="User profile picture" role="button">
                             </div>
 
                             <h3 class="profile-username text-center"><?= session()->get("title") ?></h3>
@@ -58,63 +58,94 @@
                     </div>
                 </div>
                 <div class="col-lg-8">
-                    <div class="card card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Grades</h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card card-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Grades</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <?php if ($grades): ?>
+                                        <?php
+                                        $groupedGrades = [];
+
+                                        foreach ($grades as $grade) {
+                                            $year = $grade['year'];
+                                            $semester = $grade['semester'];
+
+                                            $groupedGrades[$year][$semester][] = $grade;
+                                        }
+
+                                        $counter = 0;
+                                        ?>
+
+                                        <?php foreach ($groupedGrades as $year => $semesters): ?>
+                                            <?php
+                                            $counter++;
+                                            $collapseId = "collapseYear{$counter}";
+                                            ?>
+
+                                            <div class="mb-4">
+                                                <h4 class="text-primary font-weight-bold">
+                                                    <?= $year ?> Year
+                                                    <a data-toggle="collapse" href="#<?= $collapseId ?>" role="button" aria-expanded="true" aria-controls="<?= $collapseId ?>" class="collapse-toggle">
+                                                        <i class="fas fa-chevron-down float-right" id="icon-<?= $collapseId ?>"></i>
+                                                    </a>
+                                                </h4>
+
+                                                <div class="collapse show" id="<?= $collapseId ?>">
+                                                    <?php foreach ($semesters as $semester => $subjects): ?>
+                                                        <h5 class="text-secondary"><?= $semester ?> Semester</h5>
+
+                                                        <ul class="list-group mb-3">
+                                                            <?php foreach ($subjects as $subject): ?>
+                                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                    <span><?= $subject['title'] ?></span>
+                                                                    <span class="badge badge-info badge-pill"><?= $subject['grade'] ?></span>
+                                                                </li>
+                                                            <?php endforeach ?>
+                                                        </ul>
+                                                    <?php endforeach ?>
+                                                </div>
+                                            </div>
+                                        <?php endforeach ?>
+                                    <?php else: ?>
+                                        <h1 class="p-5 text-center text-muted">No Grades Yet</h1>
+                                    <?php endif ?>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <?php if ($grades): ?>
-                                <?php
-                                $groupedGrades = [];
-
-                                foreach ($grades as $grade) {
-                                    $year = $grade['year'];
-                                    $semester = $grade['semester'];
-
-                                    $groupedGrades[$year][$semester][] = $grade;
-                                }
-
-                                $counter = 0;
-                                ?>
-
-                                <?php foreach ($groupedGrades as $year => $semesters): ?>
-                                    <?php
-                                    $counter++;
-                                    $collapseId = "collapseYear{$counter}";
-                                    ?>
-
-                                    <div class="mb-4">
-                                        <h4 class="text-primary font-weight-bold">
-                                            <?= $year ?> Year
-                                            <a data-toggle="collapse" href="#<?= $collapseId ?>" role="button" aria-expanded="true" aria-controls="<?= $collapseId ?>" class="collapse-toggle">
-                                                <i class="fas fa-chevron-down float-right" id="icon-<?= $collapseId ?>"></i>
-                                            </a>
-                                        </h4>
-
-                                        <div class="collapse show" id="<?= $collapseId ?>">
-                                            <?php foreach ($semesters as $semester => $subjects): ?>
-                                                <h5 class="text-secondary"><?= $semester ?> Semester</h5>
-
-                                                <ul class="list-group mb-3">
-                                                    <?php foreach ($subjects as $subject): ?>
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                            <span><?= $subject['title'] ?></span>
-                                                            <span class="badge badge-info badge-pill"><?= $subject['grade'] ?></span>
-                                                        </li>
-                                                    <?php endforeach ?>
-                                                </ul>
-                                            <?php endforeach ?>
-                                        </div>
+                        <div class="col-lg-12">
+                            <div class="card card-primary">
+                                <div class="card-header">
+                                    <h3 class="card-title"><i class="fas fa-medal mr-1"></i> Achievements</h3>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-primary btn-sm" data-card-widget="collapse" title="Collapse">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
                                     </div>
-                                <?php endforeach ?>
-                            <?php else: ?>
-                                <h1 class="p-5 text-center text-muted">No Grades Yet</h1>
-                            <?php endif ?>
+                                </div>
+                                <div class="card-body">
+                                    <?php if ($achievements): ?>
+                                        <ul class="list-group">
+                                            <?php foreach ($achievements as $achievement): ?>
+                                                <li class="list-group-item">
+                                                    <h5 class="font-weight-bold"><?= esc($achievement['title']) ?></h5>
+                                                    <p class="mb-1"><?= esc($achievement['description']) ?></p>
+                                                    <small class="text-muted">Awarded on: <?= esc(date('F d, Y', strtotime($achievement['date_awarded']))) ?></small>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    <?php else: ?>
+                                        <h1 class="p-5 text-center text-muted">No Achievements Yet</h1>
+                                    <?php endif ?>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

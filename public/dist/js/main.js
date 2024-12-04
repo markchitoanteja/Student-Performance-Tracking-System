@@ -16,7 +16,7 @@ jQuery(document).ready(function () {
         "lengthChange": false,
         "ordering": false
     })
-    
+
     $(".datatable-no-fiter").DataTable({
         "filter": false,
         "paging": true,
@@ -1959,6 +1959,152 @@ jQuery(document).ready(function () {
                 }
             });
         }
+    })
+
+    $("#new_achievement_form").submit(function () {
+        const student_number = $("#new_achievement_student_number").val();
+        const title = $("#new_achievement_title").val();
+        const description = $("#new_achievement_description").val();
+        const date_awarded = $("#new_achievement_date_awarded").val();
+
+        $(".loading").removeClass("d-none");
+
+        $("#new_achievement_submit").text("Please wait...");
+        $("#new_achievement_submit").attr("disabled", true);
+
+        var formData = new FormData();
+
+        formData.append('student_number', student_number);
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('date_awarded', date_awarded);
+
+        $.ajax({
+            url: 'new_achievement',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response) {
+                    location.reload();
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $("#update_achievement_form").submit(function () {
+        const id = $("#update_achievement_id").val();
+        const student_number = $("#update_achievement_student_number").val();
+        const title = $("#update_achievement_title").val();
+        const description = $("#update_achievement_description").val();
+        const date_awarded = $("#update_achievement_date_awarded").val();
+
+        $(".loading").removeClass("d-none");
+
+        $("#update_achievement_submit").text("Please wait...");
+        $("#update_achievement_submit").attr("disabled", true);
+
+        var formData = new FormData();
+
+        formData.append('id', id);
+        formData.append('student_number', student_number);
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('date_awarded', date_awarded);
+
+        $.ajax({
+            url: 'update_achievement',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response) {
+                    location.reload();
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $(document).on("click", ".update_achievement", function () {
+        const id = $(this).attr("update_achievement_id");
+
+        $(".loading").removeClass("d-none");
+
+        $("#update_achievement_modal").modal("show");
+
+        var formData = new FormData();
+
+        formData.append('id', id);
+
+        $.ajax({
+            url: 'get_achievement_data',
+            data: formData,
+            type: 'POST',
+            dataType: 'JSON',
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response) {
+                    $("#update_achievement_id").val(response.id);
+                    $("#update_achievement_student_number").val(response.student_number);
+                    $("#update_achievement_title").val(response.title);
+                    $("#update_achievement_description").val(response.description);
+                    $("#update_achievement_date_awarded").val(response.date_awarded);
+
+                    $(".loading").addClass("d-none");
+                }
+            },
+            error: function (_, _, error) {
+                console.error(error);
+            }
+        });
+    })
+
+    $(document).on("click", ".delete_achievement", function () {
+        const id = $(this).attr("update_achievement_id");
+
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var formData = new FormData();
+
+                formData.append('id', id);
+
+                $.ajax({
+                    url: 'delete_achievement',
+                    data: formData,
+                    type: 'POST',
+                    dataType: 'JSON',
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response) {
+                            location.reload();
+                        }
+                    },
+                    error: function (_, _, error) {
+                        console.error(error);
+                    }
+                });
+            }
+        });
     })
 
     function getOrdinalSuffix(n) {

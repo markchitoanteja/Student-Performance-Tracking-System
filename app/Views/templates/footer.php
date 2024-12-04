@@ -724,6 +724,104 @@
             </div>
         <?php endif ?>
 
+        <?php if (session()->get("current_page") == "student_achievements"): ?>
+            <!-- New Achievements Modal -->
+            <div class="modal fade" id="new_achievement_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="overlay loading d-none">
+                            <i class="fas fa-2x fa-sync fa-spin"></i>
+                        </div>
+                        <div class="modal-header">
+                            <h5 class="modal-title">New Achievement</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="javascript:void(0)" id="new_achievement_form">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="new_achievement_student_number">Student</label>
+                                    <select class="custom-select" id="new_achievement_student_number" required>
+                                        <option value disabled selected></option>
+                                        <?php if ($students): ?>
+                                            <?php foreach ($students as $student): ?>
+                                                <option value="<?= $student["student_number"] ?>"><?= $student["first_name"] ?> <?= !empty($student["middle_name"]) ? $student["middle_name"][0] . '.' : '' ?> <?= $student["last_name"] ?></option>
+                                            <?php endforeach ?>
+                                        <?php endif ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_achievement_title">Title</label>
+                                    <input type="text" class="form-control" id="new_achievement_title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_achievement_description">Description</label>
+                                    <textarea class="form-control" id="new_achievement_description" rows="2" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_achievement_date_awarded">Date Awarded</label>
+                                    <input type="date" class="form-control" id="new_achievement_date_awarded" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="new_achievement_submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Update Achievements Modal -->
+            <div class="modal fade" id="update_achievement_modal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="overlay loading d-none">
+                            <i class="fas fa-2x fa-sync fa-spin"></i>
+                        </div>
+                        <div class="modal-header">
+                            <h5 class="modal-title">Update Achievement</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="javascript:void(0)" id="update_achievement_form">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="update_achievement_student_number">Student</label>
+                                    <select class="custom-select" id="update_achievement_student_number" required>
+                                        <?php if ($students): ?>
+                                            <?php foreach ($students as $student): ?>
+                                                <option value="<?= $student["student_number"] ?>"><?= $student["first_name"] ?> <?= !empty($student["middle_name"]) ? $student["middle_name"][0] . '.' : '' ?> <?= $student["last_name"] ?></option>
+                                            <?php endforeach ?>
+                                        <?php endif ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_achievement_title">Title</label>
+                                    <input type="text" class="form-control" id="update_achievement_title" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_achievement_description">Description</label>
+                                    <textarea class="form-control" id="update_achievement_description" rows="2" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="update_achievement_date_awarded">Date Awarded</label>
+                                    <input type="date" class="form-control" id="update_achievement_date_awarded" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="hidden" id="update_achievement_id">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="update_achievement_submit">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endif ?>
+
         <script>
             var base_url = "<?= base_url() ?>";
             var mode = "<?= session()->get("mode") ?>";
@@ -740,7 +838,7 @@
         <script src="<?= base_url() ?>public/plugins/inputmask/inputmask.min.js"></script>
         <script src="<?= base_url() ?>public/plugins/select2/js/select2.full.min.js"></script>
         <script src="<?= base_url() ?>public/dist/js/adminlte.min.js"></script>
-        <script src="<?= base_url() ?>public/dist/js/main.js?v=1.1.4"></script>
+        <script src="<?= base_url() ?>public/dist/js/main.js?v=1.1.6"></script>
         </body>
 
         </html>

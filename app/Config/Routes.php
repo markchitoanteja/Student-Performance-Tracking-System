@@ -12,6 +12,7 @@ $routes->get('/student_profile', 'Main::student_profile');
 $routes->get('/course_management', 'Main::course_management');
 $routes->get('/subject_management', 'Main::subject_management');
 $routes->get('/grade_management', 'Main::grade_management');
+$routes->get('/student_achievements', 'Main::student_achievements');
 
 $routes->post('/get_user_details', 'Auth::get_user_details');
 $routes->post('/change_mode', 'Main::change_mode');
@@ -37,3 +38,7 @@ $routes->post('/delete_grade', 'Main::delete_grade');
 $routes->post('/get_grade_data', 'Main::get_grade_data');
 $routes->post('/update_grade', 'Main::update_grade');
 $routes->post('/get_subject_data_by_course', 'Main::get_subject_data_by_course');
+$routes->post('/new_achievement', 'Main::new_achievement');
+$routes->post('/get_achievement_data', 'Main::get_achievement_data');
+$routes->post('/update_achievement', 'Main::update_achievement');
+$routes->post('/delete_achievement', 'Main::delete_achievement');

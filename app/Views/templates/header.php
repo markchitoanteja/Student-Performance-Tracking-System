@@ -104,6 +104,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="<?= base_url() ?>student_achievements" class="nav-link <?= session()->get("current_page") == "student_achievements" ? "active" : null ?>">
+                                <i class="nav-icon fas fa-medal"></i>
+                                <p>Student Achievements</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="javascript:void(0)" class="nav-link logout">
                                 <i class="nav-icon fas fa-sign-out-alt"></i>
                                 <p>Logout</p>
