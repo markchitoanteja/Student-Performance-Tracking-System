@@ -42,3 +42,6 @@ $routes->post('/new_achievement', 'Main::new_achievement');
 $routes->post('/get_achievement_data', 'Main::get_achievement_data');
 $routes->post('/update_achievement', 'Main::update_achievement');
 $routes->post('/delete_achievement', 'Main::delete_achievement');
+$routes->post('/new_admin', 'Auth::new_admin');
+$routes->post('/check_admin', 'Auth::check_admin');
+$routes->post('/check_username', 'Auth::check_username');

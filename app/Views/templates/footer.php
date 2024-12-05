@@ -45,6 +45,7 @@
                             <div class="form-group">
                                 <label for="account_settings_username">Username</label>
                                 <input type="text" class="form-control" id="account_settings_username" placeholder="Enter your username" required>
+                                <small class="text-danger d-none" id="error_account_settings_username">Username is already in use</small>
                             </div>
                             <div class="form-group">
                                 <label for="account_settings_password">Password</label>

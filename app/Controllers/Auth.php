@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\User_Model;
 use App\Models\Log_Model;
+use Exception;
 
 date_default_timezone_set('Asia/Manila');
 
@@ -64,6 +65,77 @@ class Auth extends BaseController
         echo json_encode($user_data);
     }
 
+    public function check_admin()
+    {
+        $username = $this->request->getPost("username");
+        $password = $this->request->getPost("password");
+
+        $response = false;
+
+        $User_Model = new User_Model();
+
+        $user_data = $User_Model->where('username', $username)->first();
+
+        if ($user_data) {
+            $hash = $user_data["password"];
+
+            if (password_verify($password, $hash)) {
+                $response = true;
+            }
+        }
+
+        echo json_encode($response);
+    }
+
+    public function check_username()
+    {
+        $username = $this->request->getPost("username");
+
+        $response = false;
+
+        $User_Model = new User_Model();
+
+        $user_data = $User_Model->where('username', $username)->first();
+
+        if (!$user_data) {
+            $response = true;
+        }
+
+        echo json_encode($response);
+    }
+
+    public function new_admin()
+    {
+        $name = $this->request->getPost("name");
+        $username = $this->request->getPost("username");
+        $password = $this->request->getPost("password");
+        $image_file = $this->request->getFile("image_file");
+
+        $User_Model = new User_Model();
+
+        $image = $this->upload_image("public/dist/img/uploads/admin/", $image_file);
+
+        $data = [
+            "name" => $name,
+            "username" => $username,
+            "password" => password_hash($password, PASSWORD_BCRYPT),
+            "image" => $image,
+            "created_at" => date("Y-m-d H:i:s"),
+            "updated_at" => date("Y-m-d H:i:s"),
+        ];
+
+        $User_Model->save($data);
+
+        session()->set("notification", array(
+            "type" => "alert-success",
+            "message" => "Account has been successfully saved",
+        ));
+
+        $this->add_log_data($User_Model->getInsertID(), "Registered a new admin.");
+
+        echo json_encode(true);
+    }
+
     public function update_admin()
     {
         $id = $this->request->getPost("id");
@@ -75,35 +147,43 @@ class Auth extends BaseController
         $is_new_image = $this->request->getPost("is_new_image");
         $image_file = $this->request->getFile("image_file");
 
+        $response = false;
+
         $User_Model = new User_Model();
 
-        if ($is_new_image == "true") {
-            $image = $this->upload_image("public/dist/img/uploads/admin/", $image_file);
+        $user_data = $User_Model->where('username', $username)->where('id !=', $id)->first();
+
+        if (!$user_data) {
+            if ($is_new_image == "true") {
+                $image = $this->upload_image("public/dist/img/uploads/admin/", $image_file);
+            }
+
+            if ($is_new_password == "true") {
+                $password = password_hash($password, PASSWORD_BCRYPT);
+            }
+
+            $data = [
+                "name" => $name,
+                "username" => $username,
+                "password" => $password,
+                "image" => $image,
+                "updated_at" => date("Y-m-d H:i:s"),
+            ];
+
+            $User_Model->update($id, $data);
+
+            session()->set("notification", array(
+                "title" => "Success!",
+                "text" => "Account has been successfully updated.",
+                "icon" => "success",
+            ));
+
+            $this->add_log_data(session()->get("user_id"), "Updated account information.");
+
+            $response = true;
         }
 
-        if ($is_new_password == "true") {
-            $password = password_hash($password, PASSWORD_BCRYPT);
-        }
-
-        $data = [
-            "name" => $name,
-            "username" => $username,
-            "password" => $password,
-            "image" => $image,
-            "updated_at" => date("Y-m-d H:i:s"),
-        ];
-
-        $User_Model->update($id, $data);
-
-        session()->set("notification", array(
-            "title" => "Success!",
-            "text" => "Account has been successfully updated.",
-            "icon" => "success",
-        ));
-
-        $this->add_log_data(session()->get("user_id"), "Updated account information.");
-
-        echo json_encode(true);
+        echo json_encode($response);
     }
 
     public function logout()

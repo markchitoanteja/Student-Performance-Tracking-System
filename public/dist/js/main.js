@@ -197,9 +197,15 @@ jQuery(document).ready(function () {
                 contentType: false,
                 success: function (response) {
                     if (response) {
-                        setTimeout(function () {
-                            location.reload();
-                        }, 1500);
+                        location.reload();
+                    } else {
+                        $("#account_settings_username").addClass("is-invalid");
+                        $("#error_account_settings_username").removeClass("d-none");
+
+                        $("#account_settings_submit").text("Save changes");
+                        $("#account_settings_submit").removeAttr("disabled");
+
+                        $(".loading").addClass("d-none");
                     }
                 },
                 error: function (_, _, error) {
@@ -209,6 +215,11 @@ jQuery(document).ready(function () {
         }
     })
 
+    $("#account_settings_username").keydown(function () {
+        $("#account_settings_username").removeClass("is-invalid");
+        $("#error_account_settings_username").addClass("d-none");
+    })
+    
     $("#account_settings_password").keydown(function () {
         $("#account_settings_password").removeClass("is-invalid");
         $("#account_settings_confirm_password").removeClass("is-invalid");
